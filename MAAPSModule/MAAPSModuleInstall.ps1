@@ -1,4 +1,8 @@
 ﻿#iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModuleInstall.ps1'))
+<# Modules installation script
+01.03.2017 andrey@makovetsky.me
+#>
+
 Function Get-RandomName {
 	param(
 		[int]$length = 20,$characters ='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789()=+_-'

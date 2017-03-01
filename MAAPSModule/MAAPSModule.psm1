@@ -1,6 +1,43 @@
 ﻿<#$env:PSModulePath -split ";"
 add new path with folder name like module.psm1 (file with functions) name#>
 
+Function Update-MAAPSModule {
+	$MAAPSModulePath = "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\MAAPSModule"
+	$MAAPSModuleURLManifest = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
+	$MAAPSModuleURL = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psm1"
+	$MAAPSModuleURLManifestDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURLManifest)
+	$MAAPSModuleURLDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURL)
+
+	$RandomNameString = Get-RandomName
+	$psd1temp = $env:TEMP + "\" + $RandomNameString + ".psd1"
+	$psm1temp = $env:TEMP + "\" + $RandomNameString + ".psm1"
+
+	Write-Output $MAAPSModuleURLManifestDownloaded | Out-File $psd1temp -Encoding unicode
+	Write-Output $MAAPSModuleURLDownloaded | Out-File $psm1temp -Encoding utf8
+
+    $MAAPSModuleENV = Get-Module -ListAvailable | Where-Object {$_.Name -eq "MAAPSModule"}
+    $LocalVersion = $MAAPSModuleENV.Version
+    $InternetVersion = (Test-ModuleManifest $psd1temp).Version
+    if ($LocalVersion -lt $InternetVersion) {
+        Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force
+        Copy-Item "$psm1temp" "$MAAPSModulePath\MAAPSModule.psm1" -Force
+    } else {
+        Write-Host "Versions of local and web files are equal." -f DarkCyan
+        Write-Host "Download files from web anyway?" -f Cyan
+        Write-Host "[Y] Yes" -f Yellow -NoNewline
+        Write-Host " or [n] No (Default is [Y]):" -NoNewline
+        $UpgradeSwith = Read-Host
+        if ($UpgradeSwith -ne "n") {
+			Remove-Module MAAPSModule -Force
+            Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force
+            Copy-Item "$psm1temp" "$MAAPSModulePath\MAAPSModule.psm1" -Force
+        }
+    }
+    Remove-Item $psd1temp -Force
+    Remove-Item $psm1temp -Force
+    Import-Module MAAPSModule -Force
+}
+
 Function Get-LocalDisk {
 <#
     .SYNOPSIS
@@ -10,9 +47,9 @@ Function Get-LocalDisk {
         Show fixed disk information in table pane with AutoSize formatting
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
-    Get-Volume | Sort-Object DriveLetter | Where {$_.DriveType -match "Fixed"} | ft -AutoSize
+    Get-Volume | Sort-Object DriveLetter | Where-Object {$_.DriveType -match "Fixed"} | ft -AutoSize
 }
 
 Function Get-SQLInstances {
@@ -24,7 +61,7 @@ Function Get-SQLInstances {
         Show local running SQL instances
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
     $Instances = Get-Service | Where-Object {($_.DisplayName -like 'SQL Server (*') -and ($_.Status -like 'Running')}
     $Instances = ($Instances.DisplayName).Substring(12)
@@ -61,7 +98,7 @@ Function Get-SQLDbs {
          Show list of DB from instance with port 1102
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
     Param ($instance = "localhost")
     [System.Reflection.Assembly]::LoadWithPartialName(‘Microsoft.SqlServer.SMO’) | Out-Null
@@ -116,7 +153,7 @@ Function Get-RandomPassword {
          Generate password with length 13
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
 	param(
 		[int]$length = 20,
@@ -146,7 +183,7 @@ Function Pause {
          Pause script
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
     param ($message = "Press any key...")
 
@@ -172,7 +209,7 @@ Function Get-NotStartedSVCs {
         Shows services that not started but have startup type Automatic on localhost or $srv
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
     param ($srv = "localhost")
     Get-Service -ComputerName $srv | where {$_.starttype -match "Automatic" -and $_.status -ne "Running"}
@@ -187,43 +224,6 @@ Function Get-RandomName {
 	[String]$characters[$random]
 }
 
-Function Update-MAAPSModule {
-	$MAAPSModulePath = "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\MAAPSModule"
-	$MAAPSModuleURLManifest = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
-	$MAAPSModuleURL = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psm1"
-	$MAAPSModuleURLManifestDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURLManifest)
-	$MAAPSModuleURLDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURL)
-
-	$RandomNameString = Get-RandomName
-	$psd1temp = $env:TEMP + "\" + $RandomNameString + ".psd1"
-	$psm1temp = $env:TEMP + "\" + $RandomNameString + ".psm1"
-
-	Write-Output $MAAPSModuleURLManifestDownloaded | Out-File $psd1temp -Encoding unicode
-	Write-Output $MAAPSModuleURLDownloaded | Out-File $psm1temp -Encoding utf8
-
-    $MAAPSModuleENV = Get-Module -ListAvailable | where {$_.Name -eq "MAAPSModule"}
-    $LocalVersion = $MAAPSModuleENV.Version
-    $InternetVersion = (Test-ModuleManifest $psd1temp).Version
-    if ($LocalVersion -lt $InternetVersion) {
-        Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force
-        Copy-Item "$psm1temp" "$MAAPSModulePath\MAAPSModule.psm1" -Force
-    } else {
-        Write-Host "Versions of local and web files are equal." -f DarkCyan
-        Write-Host "Download files from web anyway?" -f Cyan
-        Write-Host "[Y] Yes" -f Yellow -NoNewline
-        Write-Host " or [n] No (Default is [Y]):" -NoNewline
-        $UpgradeSwith = Read-Host
-        if ($UpgradeSwith -ne "n") {
-			Remove-Module MAAPSModule -Force
-            Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force
-            Copy-Item "$psm1temp" "$MAAPSModulePath\MAAPSModule.psm1" -Force
-        }
-    }
-    Remove-Item $psd1temp -Force
-    Remove-Item $psm1temp -Force
-    Import-Module MAAPSModule -Force
-}
-
 Function Get-MAACommands {
 <#
     .SYNOPSIS
@@ -233,7 +233,7 @@ Function Get-MAACommands {
         Alias for get-command from MAAPSModule
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
     Get-Command | where {$_.ModuleName -eq "MAAPSModule"}
 }
@@ -255,7 +255,7 @@ Function Invoke-ABTPSScript {
          Download and execute script from link https://avicom.ru/uploader/ps1/test.ps1
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
     Param ([Parameter(Mandatory=$true,Position=1)][String]$name)
     $url = "https://avicom.ru/uploader/ps1/" + $name + ".ps1"
@@ -268,14 +268,14 @@ Function Connect-Remote {
         Connect to SSL RemotePS 
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
     param ([Parameter(Mandatory=$true)] [ValidateNotNullOrEmpty()] [string] $srv)
 	$cred = Get-Credential -Credential "Andrey.Makovetsky"
 	Enter-PSSession -ComputerName $srv -UseSSL -Credential $cred
 }
 
-Function Invoke-File {
+Function Get-File {
 <#
     .SYNOPSIS
         Download file from URL
@@ -287,12 +287,12 @@ Function Invoke-File {
         Use url for download file to current folder
 
     .EXAMPLE
-         Invoke-File http://download.ru/example_file.zip
+         Get-File http://download.ru/example_file.zip
 
          Download file example_file.zip from url to current folder with example_file.zip name
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
 	Param([Parameter(Mandatory=$true,Position=1)][String]$url)
 	$filename = Split-Path -leaf $url
@@ -322,7 +322,7 @@ Function Set-MAAAliases {
         Set aliases
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
 	$AliasPath = (Get-Variable profile).Value
 	$Aliases = 'Set-Alias "cr" Connect-Remote'
@@ -335,7 +335,7 @@ Function Get-StoppedAppPools {
         Get stopped IIS AppPools
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
 	$LoadedModules = Get-Module
 	$IsModuleLoaded = $false
@@ -345,7 +345,7 @@ Function Get-StoppedAppPools {
 	if ($IsModuleLoaded -eq $False) {
 		Import-Module WebAdministration}
 
-	Get-ChildItem IIS:\AppPools\ | where {$_.state -ne "started"}
+	Get-ChildItem IIS:\AppPools\ | Where-Object {$_.state -ne "started"}
 
 }
 
@@ -355,9 +355,9 @@ Function Get-WAS7daysErrors {
         Get eventlog error for ASP.NET for last 7 days
 
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
-	Get-EventLog -LogName system -After ((Get-Date).AddDays(-7)) | where {$_.source -eq "WAS" -and $_.EntryType -ne "Information"}
+	Get-EventLog -LogName system -After ((Get-Date).AddDays(-7)) | Where-Object {$_.source -eq "WAS" -and $_.EntryType -ne "Information"}
 }
 
 Function Invoke-DCsCommand {
@@ -380,7 +380,7 @@ Function Invoke-DCsCommand {
          Authorize and run command Get-LocalDisk on dc01,2,3,5
 	
     .LINK
-        https://makovetsky.me
+        https://github.com/ripev/PowerShell/
 #>
 	Param(
 		[Parameter(Mandatory=$true,Position=1)][String]$Command,
