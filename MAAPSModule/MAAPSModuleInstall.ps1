@@ -1,4 +1,4 @@
-﻿#iex ((new-object net.webclient).DownloadString('https://makovetsky.me/ps1/MAAPSModuleInstall.ps1'))
+﻿#iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModuleInstall.ps1'))
 Function Get-RandomName {
 	param(
 		[int]$length = 20,$characters ='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789()=+_-'
@@ -9,8 +9,8 @@ Function Get-RandomName {
 }
 
 $MAAPSModulePath = "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\MAAPSModule"
-$MAAPSModuleURLManifest = "https://makovetsky.me/ps1/MAAPSModule.psd1"
-$MAAPSModuleURL = "https://makovetsky.me/ps1/MAAPSModule.psm1"
+$MAAPSModuleURLManifest = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
+$MAAPSModuleURL = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psm1"
 $MAAPSModuleURLManifestDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURLManifest)
 $MAAPSModuleURLDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURL)
 
