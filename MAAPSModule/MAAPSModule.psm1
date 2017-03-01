@@ -49,7 +49,7 @@ Function Get-LocalDisk {
     .LINK
         https://github.com/ripev/PowerShell/
 #>
-    Get-Volume | Sort-Object DriveLetter | Where-Object {$_.DriveType -match "Fixed"} | ft -AutoSize
+    Get-Volume | Sort-Object DriveLetter | Where-Object {$_.DriveType -match "Fixed"} | Format-Table -AutoSize
 }
 
 Function Get-SQLInstances {
@@ -212,7 +212,7 @@ Function Get-NotStartedSVCs {
         https://github.com/ripev/PowerShell/
 #>
     param ($srv = "localhost")
-    Get-Service -ComputerName $srv | where {$_.starttype -match "Automatic" -and $_.status -ne "Running"}
+    Get-Service -ComputerName $srv | Where-Object {$_.starttype -match "Automatic" -and $_.status -ne "Running"}
 }
 
 Function Get-RandomName {
@@ -235,7 +235,7 @@ Function Get-MAACommands {
     .LINK
         https://github.com/ripev/PowerShell/
 #>
-    Get-Command | where {$_.ModuleName -eq "MAAPSModule"}
+    Get-Command | Where-Object {$_.ModuleName -eq "MAAPSModule"}
 }
 
 Function Invoke-ABTPSScript {
@@ -259,7 +259,7 @@ Function Invoke-ABTPSScript {
 #>
     Param ([Parameter(Mandatory=$true,Position=1)][String]$name)
     $url = "https://avicom.ru/uploader/ps1/" + $name + ".ps1"
-	iex ((new-object net.webclient).DownloadString($url))
+	Invoke-Expression ((new-object net.webclient).DownloadString($url))
 }
 
 Function Connect-Remote {

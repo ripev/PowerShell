@@ -30,7 +30,7 @@ if ((Test-Path $MAAPSModulePath) -ne $true) {
     Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force
     Copy-Item "$psm1temp" "$MAAPSModulePath\MAAPSModule.psm1" -Force
 } else {
-    $MAAPSModuleENV = Get-Module -ListAvailable | where {$_.Name -eq "MAAPSModule"}
+    $MAAPSModuleENV = Get-Module -ListAvailable | Where-Object {$_.Name -eq "MAAPSModule"}
     $LocalVersion = $MAAPSModuleENV.Version
     $InternetVersion = (Test-ModuleManifest $psd1temp).Version
     if ($LocalVersion -lt $InternetVersion) {
