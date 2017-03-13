@@ -1,10 +1,11 @@
 ﻿<#$env:PSModulePath -split ";"
 add new path with folder name like module.psm1 (file with functions) name#>
 
+$MAAPSModuleURLManifest = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
+$MAAPSModuleURL = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psm1"
+
 Function Update-MAAPSModule {
 	$MAAPSModulePath = "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\MAAPSModule"
-	$MAAPSModuleURLManifest = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
-	$MAAPSModuleURL = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psm1"
 	$MAAPSModuleURLManifestDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURLManifest)
 	$MAAPSModuleURLDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURL)
 
@@ -394,4 +395,16 @@ Function Invoke-DCsCommand {
 		" on $srv`n" | Write-Host -ForegroundColor Cyan
 		Invoke-Command -ComputerName $srv -Credential $Credential -UseSSL -ScriptBlock $Script
 	}
+}
+
+Function Get-MAAPSModuleInternetVersion {
+	$MAAPSModuleURLManifestDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURLManifest)
+	$MAAPSModuleURLDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURL)
+	$RandomNameString = Get-RandomName
+	$psd1temp = $env:TEMP + "\" + $RandomNameString + ".psd1"
+	$psm1temp = $env:TEMP + "\" + $RandomNameString + ".psm1"
+	Write-Output $MAAPSModuleURLManifestDownloaded | Out-File $psd1temp -Encoding unicode
+	Write-Output $MAAPSModuleURLDownloaded | Out-File $psm1temp -Encoding utf8
+	$InternetVersion = (Test-ModuleManifest $psd1temp).Version
+	Write-Host "Internet version of modules is $($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)" -ForegroundColor Yellow
 }
