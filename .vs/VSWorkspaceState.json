@@ -3,6 +3,6 @@
     "",
     "\\MAAPSModule"
   ],
-  "SelectedNode": "\\MAAPSModule\\MAAPSModuleInstall.ps1",
+  "SelectedNode": "\\MAAPSModule\\MAAPSModule.psm1",
   "PreviewInSolutionExplorer": false
 }

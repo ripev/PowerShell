@@ -406,5 +406,6 @@ Function Get-MAAPSModuleInternetVersion {
 	Write-Output $MAAPSModuleURLManifestDownloaded | Out-File $psd1temp -Encoding unicode
 	Write-Output $MAAPSModuleURLDownloaded | Out-File $psm1temp -Encoding utf8
 	$InternetVersion = (Test-ModuleManifest $psd1temp).Version
-	Write-Host "Internet version of modules is $($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)" -ForegroundColor Yellow
+	Write-Host "Internet version of modules is: " -ForegroundColor Yellow -NoNewline
+	Write-Host "$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)" -ForegroundColor Green
 }
