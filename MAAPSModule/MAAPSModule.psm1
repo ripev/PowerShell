@@ -52,7 +52,7 @@ Function Update-MAAPSModule {
 			if ($LocalVersion -eq $InternetVersion -and $force -eq $true) {
 				Write-Host "Force update local modules" -ForegroundColor Yellow
 			} else {
-				oWrite-Host "Update local version from '$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build) to '$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)'" -ForegroundColor Yellow
+				Write-Host "Update local version from '$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build) to '$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)'" -ForegroundColor Yellow
 			}
 			Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force -ErrorAction Stop
 			Copy-Item "$psm1temp" "$MAAPSModulePath\MAAPSModule.psm1" -Force -ErrorAction Stop
