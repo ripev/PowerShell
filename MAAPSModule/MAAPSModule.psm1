@@ -491,7 +491,7 @@ Function Test-SSL {
 				}    	
 				catch {
 					Write-Host "Cannot send email with message:" -ForegroundColor DarkGray
-					Write-Host "$($Error.Exception)" -ForegroundColor Red
+					Write-Host "$($_.Exception.Message)" -ForegroundColor Red
 				}
 			} else {
 				Write-Host "`nStatus: OK" -ForegroundColor DarkGreen
