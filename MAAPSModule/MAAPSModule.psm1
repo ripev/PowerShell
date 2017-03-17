@@ -424,7 +424,7 @@ Function Invoke-DCsCommand {
 	}
 }
 
-Function Check-SSL {
+Function Test-SSL {
 <#
 	.SYNOPSIS
 		Check-SSL.ps1 - Gets SSL certificate expiration date
