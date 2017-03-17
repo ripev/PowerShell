@@ -459,18 +459,8 @@ Function Test-SSL {
 	)
 	$Error.Clear()
 	$MailTo="andrey.makovetsky@avicom.ru"
-	$MailSubject="$WebsiteURL - SSL certificate will expire in $ValidDays days"
 	$MailFrom="notifications@avicom.ru"
 	$SmtpServer="localmail.abt.local"
-	$MailBody=@"
-		<html><span style='font-family: Tahoma; font-size: 12px;' >Hi,<br />
-		<br />
-		the SSL certificate for the website "$WebsiteURL" will expire in $ValidDays days. You should conserder renewing it.<br />
-		<br />
-		----------------------------------------------------------------------------</span><br />
-		<span style='font-family: Tahoma; font-size: 10px;' >This is an automatically generated email, please do not reply.<br />&nbsp;<br /></span></html>
-"@
- 
 	Try {
 		$Conn = New-Object System.Net.Sockets.TcpClient($WebsiteURL,$WebsitePort) 
   
@@ -486,6 +476,15 @@ Function Test-SSL {
 				Write-Host "`nStatus: Warning (Expires in $ValidDays days)" -ForegroundColor Yellow
 				Write-Host "CertExpiration: $ValidTo`n" -ForegroundColor Yellow
 				try {
+					$MailSubject="$WebsiteURL - SSL certificate will expire in $ValidDays days"
+					$MailBody=@"
+						<html><span style='font-family: Tahoma; font-size: 12px;' >Hi,<br />
+						<br />
+						the SSL certificate for the website "$WebsiteURL" will expire in $ValidDays days. You should conserder renewing it.<br />
+						<br />
+						----------------------------------------------------------------------------</span><br />
+						<span style='font-family: Tahoma; font-size: 10px;' >This is an automatically generated email, please do not reply.<br />&nbsp;<br /></span></html>
+"@
 					Send-MailMessage -To $MailTo -Subject $MailSubject -From $MailFrom -SmtpServer $SmtpServer -Priority High -BodyAsHtml $MailBody -ErrorAction Stop
 				}    	
 				catch {
