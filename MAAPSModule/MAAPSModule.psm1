@@ -47,22 +47,22 @@ Function Update-MAAPSModule {
 	$LocalVersion = Get-MAAPSModuleLocalVersion
 	if ($LocalVersion -eq $InternetVersion -and $force -eq $false) {
 		Write-Host "Local and internet version are equal. No updates needed." -ForegroundColor Yellow
-		Exit
-	}
-	try {
-		if ($LocalVersion -eq $InternetVersion -and $force -eq $true) {
-			Write-Host "Force update local modules" -ForegroundColor Yellow
-		} else {
-			Write-Host "Update local version from '$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build)'`
-			to '$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)'" -ForegroundColor Yellow
+	} else {
+		try {
+			if ($LocalVersion -eq $InternetVersion -and $force -eq $true) {
+				Write-Host "Force update local modules" -ForegroundColor Yellow
+			} else {
+				Write-Host "Update local version from '$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build)'`
+				to '$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)'" -ForegroundColor Yellow
+			}
+			Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force -ErrorAction Stop
+			Copy-Item "$psm1temp" "$MAAPSModulePath\MAAPSModule.psm1" -Force -ErrorAction Stop
+			Write-Host "Modules installed successfully. Reload PowerShell to apply changes." -ForegroundColor DarkCyan
 		}
-		Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force -ErrorAction Stop
-		Copy-Item "$psm1temp" "$MAAPSModulePath\MAAPSModule.psm1" -Force -ErrorAction Stop
-		Write-Host "Modules installed successfully. Reload PowerShell to apply changes." -ForegroundColor DarkCyan
-	}
-	catch {
-		Write-Host "Copy error:" -ForegroundColor DarkGray
-		Write-Host "$($Error.Exception)" -ForegroundColor Red
+		catch {
+			Write-Host "Copy error:" -ForegroundColor DarkGray
+			Write-Host "$($Error.Exception)" -ForegroundColor Red
+		}
 	}
 }
 
