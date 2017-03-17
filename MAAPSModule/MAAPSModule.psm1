@@ -17,7 +17,8 @@ Function Get-MAAPSModuleInternetVersion {
 	$OutputItem | Add-Member NoteProperty "Version"	(Test-ModuleManifest $psd1temp).Version
 	$OutputItem | Add-Member NoteProperty "psdpath" $psd1temp
 	$OutputItem | Add-Member NoteProperty "psmpath" $psm1temp
-	$Output
+	$Output += $OutputItem
+    $Output
 }
 
 Function Get-MAAPSModuleLocalVersion {
