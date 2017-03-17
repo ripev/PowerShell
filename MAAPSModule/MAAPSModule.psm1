@@ -4,39 +4,66 @@ add new path with folder name like module.psm1 (file with functions) name#>
 $MAAPSModuleURLManifest = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
 $MAAPSModuleURL = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psm1"
 
-Function Update-MAAPSModule {
-	$MAAPSModulePath = "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\MAAPSModule"
+Function Get-MAAPSModuleInternetVersion {
 	$MAAPSModuleURLManifestDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURLManifest)
 	$MAAPSModuleURLDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURL)
-
 	$RandomNameString = Get-RandomName
 	$psd1temp = $env:TEMP + "\" + $RandomNameString + ".psd1"
 	$psm1temp = $env:TEMP + "\" + $RandomNameString + ".psm1"
-
 	Write-Output $MAAPSModuleURLManifestDownloaded | Out-File $psd1temp -Encoding unicode
 	Write-Output $MAAPSModuleURLDownloaded | Out-File $psm1temp -Encoding utf8
+	$Output=@()
+	$OutputItem = New-Object Object
+	$OutputItem | Add-Member NoteProperty "Version"	(Test-ModuleManifest $psd1temp).Version
+	$OutputItem | Add-Member NoteProperty "psdpath" $psd1temp
+	$OutputItem | Add-Member NoteProperty "psmpath" $psm1temp
+	$Output
+}
 
-    $MAAPSModuleENV = Get-Module -ListAvailable | Where-Object {$_.Name -eq "MAAPSModule"}
-    $LocalVersion = $MAAPSModuleENV.Version
-    $InternetVersion = (Test-ModuleManifest $psd1temp).Version
-    if ($LocalVersion -lt $InternetVersion) {
-        Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force
-        Copy-Item "$psm1temp" "$MAAPSModulePath\MAAPSModule.psm1" -Force
-    } else {
-        Write-Host "Versions of local and web files are equal." -f DarkCyan
-        Write-Host "Download files from web anyway?" -f Cyan
-        Write-Host "[Y] Yes" -f Yellow -NoNewline
-        Write-Host " or [n] No (Default is [Y]):" -NoNewline
-        $UpgradeSwith = Read-Host
-        if ($UpgradeSwith -ne "n") {
-			Remove-Module MAAPSModule -Force
-            Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force
-            Copy-Item "$psm1temp" "$MAAPSModulePath\MAAPSModule.psm1" -Force
-        }
-    }
-    Remove-Item $psd1temp -Force
-    Remove-Item $psm1temp -Force
-    Import-Module MAAPSModule -Force
+Function Get-MAAPSModuleLocalVersion {
+	(Get-Module MAAPSModule).Version
+}
+
+Function Get-MAAPSModuleVerions {
+	$InternetVersion = (Get-MAAPSModuleInternetVersion).Version
+	Write-Host "Internet version of modules is:`t" -ForegroundColor Yellow -NoNewline
+	Write-Host "$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)" -ForegroundColor Green
+	$LocalVersion = Get-MAAPSModuleLocalVersion
+	Write-Host "Local version of modules is:`t" -ForegroundColor Yellow -NoNewline
+	Write-Host "$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build)" -ForegroundColor Green
+}
+
+Function Update-MAAPSModule {
+	Param(
+		[Parameter(Position=0)][ValidateSet($true,$false)][Boolean]$force=$false
+	)
+	$Error.Clear()
+	$MAAPSModulePath = "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\MAAPSModule"
+	$InternetVersionInfo = Get-MAAPSModuleInternetVersion
+	$psd1temp = $InternetVersionInfo.psdpath
+	$psm1temp = $InternetVersionInfo.psmpath
+	$InternetVersion = $InternetVersionInfo.Version
+	$LocalVersion = Get-MAAPSModuleLocalVersion
+	if ($LocalVersion -eq $InternetVersion -and $force -eq $false) {
+		Write-Host "Local and internet version are equal. No updates needed." -ForegroundColor Yellow
+		Exit
+	}
+	try {
+		if ($LocalVersion -eq $InternetVersion -and $force -eq $true) {
+			Write-Host "Force update local modules" -ForegroundColor Yellow
+		} else {
+			Write-Host "Update local version from '$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build)'`
+			to '$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)'" -ForegroundColor Yellow
+		}
+		Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force -ErrorAction Stop
+		Copy-Item "$psm1temp" "$MAAPSModulePath\MAAPSModule.psm1" -Force -ErrorAction Stop
+		Write-Host "Modules installed successfully. Reload PowerShell to apply changes." -ForegroundColor DarkCyan
+	}
+	catch {
+		Write-Host "Copy error:" -ForegroundColor DarkGray
+		Write-Host "$($Error.Exception)" -ForegroundColor Red
+		Exit 1
+	}
 }
 
 Function Get-LocalDisk {
@@ -397,15 +424,88 @@ Function Invoke-DCsCommand {
 	}
 }
 
-Function Get-MAAPSModuleInternetVersion {
-	$MAAPSModuleURLManifestDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURLManifest)
-	$MAAPSModuleURLDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURL)
-	$RandomNameString = Get-RandomName
-	$psd1temp = $env:TEMP + "\" + $RandomNameString + ".psd1"
-	$psm1temp = $env:TEMP + "\" + $RandomNameString + ".psm1"
-	Write-Output $MAAPSModuleURLManifestDownloaded | Out-File $psd1temp -Encoding unicode
-	Write-Output $MAAPSModuleURLDownloaded | Out-File $psm1temp -Encoding utf8
-	$InternetVersion = (Test-ModuleManifest $psd1temp).Version
-	Write-Host "Internet version of modules is: " -ForegroundColor Yellow -NoNewline
-	Write-Host "$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)" -ForegroundColor Green
+Function Check-SSL {
+<#
+	.SYNOPSIS
+		Check-SSL.ps1 - Gets SSL certificate expiration date
+	.DESCRIPTION
+		Check-SSL.ps1 - Gets SSL certificate expiration date and send an email alert if a defined threshold is exceeded.
+	.PARAMETER WebsiteURL
+		Defines the URL of the SSL certificate to check
+		Mandatory parameter
+		No default value.
+	.PARAMETER WebsitePort
+		Defines the website port of the SSL certificate to check
+		Default is 443.
+	.PARAMETER CommonName
+		Defines the CommonName (CN) of the SSL certificate to check
+		Default is the value of the WebsiteURL parameter.
+	.PARAMETER Threshold
+		Defines the threshold (in days). If the SSL certificate expiration date exceeded the threshold, an email alert is sent.
+		Default is 15.
+	.NOTES
+		File Name   : Check-SSL.ps1
+		Author      : Fabrice ZERROUKI - fabricezerrouki@hotmail.com
+	.LINK
+		http://www.zerrouki.com/checkssl/
+	.EXAMPLE
+		PS D:\> .\Check-SSL.ps1 -WebsiteURL secure.zerrouki.com -Threshold 30
+		Performs a check of the expiration date for the SSL certificate that secures the website http://secure.zerrouki.com. If the certificate expires in less than 30 days, an email alert is sent.
+#>
+	Param(
+		[Parameter(Mandatory=$true,Position=0,HelpMessage="IP address or hostname to check")][string]$WebsiteURL,
+		[Parameter(Position=1,HelpMessage="The number of days after which an alert should be sent.")][int]$Threshold=15,
+		[Parameter(Position=2,HelpMessage="TCP port number that SSL application is listening on")][int]$WebsitePort=443,
+		[Parameter(HelpMessage="CommonName (CN) on certificate")][string]$CommonName=$WebsiteURL
+	)
+	$Error.Clear()
+	$MailTo="andrey.makovetsky@avicom.ru"
+	$MailSubject="$WebsiteURL - SSL certificate will expire in $ValidDays days"
+	$MailFrom="notifications@avicom.ru"
+	$SmtpServer="localmail.abt.local"
+	$MailBody=@"
+		<html><span style='font-family: Tahoma; font-size: 12px;' >Hi,<br />
+		<br />
+		the SSL certificate for the website "$WebsiteURL" will expire in $ValidDays days. You should conserder renewing it.<br />
+		<br />
+		----------------------------------------------------------------------------</span><br />
+		<span style='font-family: Tahoma; font-size: 10px;' >This is an automatically generated email, please do not reply.<br />&nbsp;<br /></span></html>
+"@
+ 
+	Try {
+		$Conn = New-Object System.Net.Sockets.TcpClient($WebsiteURL,$WebsitePort) 
+  
+		Try {
+			$Stream = New-Object System.Net.Security.SslStream($Conn.GetStream())
+			$Stream.AuthenticateAsClient($CommonName) 
+			$Cert = $Stream.Get_RemoteCertificate()
+			$ValidTo = [datetime]::Parse($Cert.GetExpirationDatestring())
+			Write-Host "`nConnection Successfull" -ForegroundColor DarkGreen
+			Write-Host "Website: $WebsiteURL"
+			$ValidDays = $($ValidTo - [datetime]::Now).Days
+			if ($ValidDays -lt $Threshold) {
+				Write-Host "`nStatus: Warning (Expires in $ValidDays days)" -ForegroundColor Yellow
+				Write-Host "CertExpiration: $ValidTo`n" -ForegroundColor Yellow
+				try {
+					Send-MailMessage -To $MailTo -Subject $MailSubject -From $MailFrom -SmtpServer $SmtpServer -Priority High -BodyAsHtml $MailBody -ErrorAction Stop
+				}    	
+				catch {
+					Write-Host "Cannot send email with message:" -ForegroundColor DarkGray
+					Write-Host "$($Error.Exception)" -ForegroundColor Red
+					Exit 1
+				}
+			} else {
+				Write-Host "`nStatus: OK" -ForegroundColor DarkGreen
+				Write-Host "CertExpiration: $ValidTo`n" -ForegroundColor DarkGreen
+			}
+		}
+		Catch { Throw $_ }
+		Finally { $Conn.close() }
+		}
+	Catch {
+			Write-Host "`nError occurred connecting to $($WebsiteURL)" -ForegroundColor Yellow
+			Write-Host "Website: $WebsiteURL"
+			Write-Host "Status:" $_.exception.innerexception.message -ForegroundColor Yellow
+			Write-Host ""
+	}
 }
