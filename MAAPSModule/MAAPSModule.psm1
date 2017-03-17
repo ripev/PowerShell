@@ -62,7 +62,6 @@ Function Update-MAAPSModule {
 	catch {
 		Write-Host "Copy error:" -ForegroundColor DarkGray
 		Write-Host "$($Error.Exception)" -ForegroundColor Red
-		Exit 1
 	}
 }
 
