@@ -455,6 +455,7 @@ Function Test-SSL {
 		[Parameter(Mandatory=$true,Position=0,HelpMessage="IP address or hostname to check")][string]$WebsiteURL,
 		[Parameter(Position=1,HelpMessage="The number of days after which an alert should be sent.")][int]$Threshold=15,
 		[Parameter(Position=2,HelpMessage="TCP port number that SSL application is listening on")][int]$WebsitePort=443,
+		[Parameter(Position=3)][ValidateSet($true,$false)][boolean]$MailSendOption=$false,
 		[Parameter(HelpMessage="CommonName (CN) on certificate")][string]$CommonName=$WebsiteURL
 	)
 	$Error.Clear()
@@ -485,7 +486,9 @@ Function Test-SSL {
 						----------------------------------------------------------------------------</span><br />
 						<span style='font-family: Tahoma; font-size: 10px;' >This is an automatically generated email, please do not reply.<br />&nbsp;<br /></span></html>
 "@
-					Send-MailMessage -To $MailTo -Subject $MailSubject -From $MailFrom -SmtpServer $SmtpServer -Priority High -BodyAsHtml $MailBody -ErrorAction Stop
+					if ($MailSendOption) {
+						Send-MailMessage -To $MailTo -Subject $MailSubject -From $MailFrom -SmtpServer $SmtpServer -Priority High -BodyAsHtml $MailBody -ErrorAction Stop
+					}
 				}    	
 				catch {
 					Write-Host "Cannot send email with message:" -ForegroundColor DarkGray
