@@ -28,10 +28,10 @@ Function Get-MAAPSModuleLocalVersion {
 Function Get-MAAPSModuleVerions {
 	$InternetVersion = (Get-MAAPSModuleInternetVersion).Version
 	Write-Host "Internet version of modules is:`t" -ForegroundColor Yellow -NoNewline
-	Write-Host "$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)" -ForegroundColor Green
+	Write-Host "$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build).$($InternetVersion.Revision)" -ForegroundColor Green
 	$LocalVersion = Get-MAAPSModuleLocalVersion
 	Write-Host "Local version of modules is:`t" -ForegroundColor Yellow -NoNewline
-	Write-Host "$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build)" -ForegroundColor Green
+	Write-Host "$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build).$($LocalVersion.Revision)" -ForegroundColor Green
 }
 
 Function Update-MAAPSModule {
@@ -352,8 +352,14 @@ Function Set-MAAAliases {
         https://github.com/ripev/PowerShell/
 #>
 	$AliasPath = (Get-Variable profile).Value
-	$Aliases = 'Set-Alias "cr" Connect-Remote'
-	Write-Output $Aliases | Out-File $AliasPath
+	$PresentAliases = Get-Content $AliasPath
+	[array]$Aliases = 'Set-Alias "cr" Connect-Remote'
+	$Aliases += 'Set-Alias "maav" Get-MAAPSModuleVerions'
+	foreach ($Alias in $Aliases) {
+		if ($PresentAliases -notcontains $Alias) {
+			Write-Output $Alias | Out-File $AliasPath -Append
+		}
+	}
 }
 
 Function Get-StoppedAppPools {
