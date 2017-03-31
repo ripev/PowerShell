@@ -461,7 +461,7 @@ Function Test-SSL {
 		[Parameter(Mandatory=$true,Position=0,HelpMessage="IP address or hostname to check")][string]$WebsiteURL,
 		[Parameter(Position=1,HelpMessage="The number of days after which an alert should be sent.")][int]$Threshold=15,
 		[Parameter(Position=2,HelpMessage="TCP port number that SSL application is listening on")][int]$WebsitePort=443,
-		[Parameter(Position=3)][ValidateSet($true,$false)][boolean]$MailSendOption=$false,
+		[Parameter(Position=3)][switch]$MailSend,
 		[Parameter(HelpMessage="CommonName (CN) on certificate")][string]$CommonName=$WebsiteURL
 	)
 	$Error.Clear()
