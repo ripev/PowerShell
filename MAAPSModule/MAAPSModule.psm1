@@ -297,9 +297,12 @@ Function Connect-Remote {
     .LINK
         https://github.com/ripev/PowerShell/
 #>
-    param ([Parameter(Mandatory=$true)] [ValidateNotNullOrEmpty()] [string] $srv)
-	$cred = Get-Credential -Credential "Andrey.Makovetsky"
-	Enter-PSSession -ComputerName $srv -UseSSL -Credential $cred
+    param (
+		[Parameter(Mandatory=$true,Position=0)] [ValidateNotNullOrEmpty()] [string] $srv,
+		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential
+	)
+	if ($Credential -eq $null) {$Credential = Get-Credential 'Andrey.Makovetsky'}
+	Enter-PSSession -ComputerName $srv -UseSSL -Credential $Credential
 }
 
 Function Get-File {
@@ -416,8 +419,8 @@ Function Invoke-DCsCommand {
         https://github.com/ripev/PowerShell/
 #>
 	Param(
-		[Parameter(Mandatory=$true,Position=1)][String]$Command,
-		[PSCredential]$Credential
+		[Parameter(Mandatory=$true,Position=0)] [String] $Command,
+		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential
 	)
 	if ($Credential -eq $null) {$Credential = Get-Credential 'Andrey.Makovetsky'}
 	$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc05.projectmate.ru"
