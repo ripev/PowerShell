@@ -4,6 +4,16 @@ add new path with folder name like module.psm1 (file with functions) name#>
 $MAAPSModuleURLManifest = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
 $MAAPSModuleURL = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psm1"
 
+Function Output {
+	Param (
+		[string] $str,
+		[string] $outfile,
+		[ValidateSet("Black","DarkBlue","DarkGreen","DarkCyan","DarkRed","DarkMagenta","DarkYellow","Gray","DarkGray","Blue","Green","Cyan","Red","Magenta","Yellow","White")][string]$color="White"
+	)
+	if ($outfile) {Write-Output "$str" | Out-File "$outfile" -Encoding utf8 -Append}
+	Write-Host "$str" -f $color
+}
+
 Function Get-MAAPSModuleInternetVersion {
 	$MAAPSModuleURLManifestDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURLManifest)
 	$MAAPSModuleURLDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURL)
@@ -63,6 +73,20 @@ Function Update-MAAPSModule {
 			Write-Host "$($Error.Exception)" -ForegroundColor Red
 		}
 	}
+}
+
+Function Get-DCCredential {
+	# if credfile does not exist, create with command:
+	# $Credential.Password | ConvertFrom-SecureString | Out-File $env:USERPROFILE\.ssh\andrey.makovetsky.cred
+	$CredFilePath = "$env:USERPROFILE\.ssh\andrey.makovetsky.cred"
+	$CredFile = Get-Item $CredFilePath
+	try {
+		$PwdSecureString = Get-Content "$CredFile" | ConvertTo-SecureString -ErrorAction Stop
+	} catch {
+		Output -outfile $log -str "File with credentials not found at '$CredFile'" -color Red
+		#Exit 1
+	}
+	New-Object System.Management.Automation.PSCredential -ArgumentList $($CredFile.BaseName), $PwdSecureString
 }
 
 Function Get-LocalDisk {
@@ -301,7 +325,7 @@ Function Connect-Remote {
 		[Parameter(Mandatory=$true,Position=0)] [ValidateNotNullOrEmpty()] [string] $srv,
 		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential
 	)
-	if ($Credential -eq $null) {$Credential = Get-Credential 'Andrey.Makovetsky'}
+	if ($Credential -eq $null) {$Credential = Get-DCCredential}
 	Enter-PSSession -ComputerName $srv -UseSSL -Credential $Credential
 }
 
@@ -422,7 +446,7 @@ Function Invoke-DCsCommand {
 		[Parameter(Mandatory=$true,Position=0)] [String] $Command,
 		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential
 	)
-	if ($Credential -eq $null) {$Credential = Get-Credential 'Andrey.Makovetsky'}
+	if ($Credential -eq $null) {$Credential = Get-DCCredential}
 	$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc05.projectmate.ru"
 	$Script = [Scriptblock]::Create($Command)
 	foreach ($srv in $srvs) {
