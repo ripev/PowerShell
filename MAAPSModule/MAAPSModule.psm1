@@ -431,23 +431,28 @@ Function Invoke-DCsCommand {
     .EXAMPLE
          Invoke-DCsCommand -Command "Get-LocalDisk"
 
-         Authorize and run command Get-LocalDisk on dc01,2,3,5
+         Authorize and run command Get-LocalDisk on dc0[1-5]
 
     .EXAMPLE
          $cred = Get-Credential "User.Name"
 		 Invoke-DCsCommand -Credential $cred -Command "Get-LocalDisk"
 
-         Authorize and run command Get-LocalDisk on dc01,2,3,5
+         Authorize and run command Get-LocalDisk on dc0[1-5]
 	
     .LINK
         https://github.com/ripev/PowerShell/
 #>
 	Param(
 		[Parameter(Mandatory=$true,Position=0)] [String] $Command,
-		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential
+		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential,
+		[swith] $All
 	)
 	if ($Credential -eq $null) {$Credential = Get-DCCredential}
-	$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc05.projectmate.ru"
+	if ($All) {
+		$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc04.projectmate.ru","dc05.projectmate.ru"
+	} else {
+		$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc05.projectmate.ru"
+	}
 	$Script = [Scriptblock]::Create($Command)
 	foreach ($srv in $srvs) {
 		"`n Executing command '$Command'" | Write-Host -ForegroundColor Yellow
