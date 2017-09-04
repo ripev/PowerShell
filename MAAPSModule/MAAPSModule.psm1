@@ -208,7 +208,7 @@ Function Get-RandomPassword {
 #>
 	param(
 		[int]$length = 20,
-		$characters ='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789!$%=*+#_'
+		$characters ='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789~![]%^*-+=:.?_'
 	)
 	# select random characters
 	$random = 1..$length | ForEach-Object { Get-Random -Maximum $characters.length }
