@@ -445,7 +445,7 @@ Function Invoke-DCsCommand {
 	Param(
 		[Parameter(Mandatory=$true,Position=0)] [String] $Command,
 		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential,
-		[swith] $All
+		[switch] $All
 	)
 	if ($Credential -eq $null) {$Credential = Get-DCCredential}
 	if ($All) {
