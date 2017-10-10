@@ -455,8 +455,10 @@ Function Invoke-DCsCommand {
 	}
 	$Script = [Scriptblock]::Create($Command)
 	foreach ($srv in $srvs) {
-		"`n Executing command '$Command'" | Write-Host -ForegroundColor Yellow
-		" on $srv`n" | Write-Host -ForegroundColor Cyan
+		"`n Executing command`t" | Write-Host -NoNewline -ForegroundColor Gray
+		"'$Command'" | Write-Host -ForegroundColor Yellow
+		" on " | Write-Host -ForegroundColor Gray -NoNewline
+		"$srv`n" | Write-Host -ForegroundColor DarkCyan
 		Invoke-Command -ComputerName $srv -Credential $Credential -UseSSL -ScriptBlock $Script
 	}
 }
