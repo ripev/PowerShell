@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
+    "\\CustomSystem",
     "\\MAAPSModule"
   ],
-  "SelectedNode": "\\MAAPSModule\\MAAPSModule.psd1",
+  "SelectedNode": "\\CustomSystem\\CustomSystem.psm1",
   "PreviewInSolutionExplorer": false
 }
