@@ -215,6 +215,7 @@ Function Get-RandomPassword {
 	# output random pwd
 	$private:ofs=""
 	$pass = [String]$characters[$random]
+	$pass
 	# send pass to clipboard
 	$pass|clip
 }
