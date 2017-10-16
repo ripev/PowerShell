@@ -214,7 +214,9 @@ Function Get-RandomPassword {
 	$random = 1..$length | ForEach-Object { Get-Random -Maximum $characters.length }
 	# output random pwd
 	$private:ofs=""
-	[String]$characters[$random]
+	$pass = [String]$characters[$random]
+	# send pass to clipboard
+	$pass|clip
 }
 
 Function Pause {
