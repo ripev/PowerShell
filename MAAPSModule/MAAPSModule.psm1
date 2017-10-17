@@ -46,7 +46,7 @@ Function Get-MAAPSModuleVerions {
 
 Function Update-MAAPSModule {
 	Param(
-		[Parameter(Position=0)][ValidateSet($true,$false)][Boolean]$force=$false
+		[Parameter(Mandatory=$false,Position=0)][switch]$force
 	)
 	$Error.Clear()
 	$MAAPSModulePath = "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\MAAPSModule"
@@ -55,14 +55,14 @@ Function Update-MAAPSModule {
 	$psm1temp = $InternetVersionInfo.psmpath
 	$InternetVersion = $InternetVersionInfo.Version
 	$LocalVersion = Get-MAAPSModuleLocalVersion
-	if ($LocalVersion -eq $InternetVersion -and $force -eq $false) {
+	if ($LocalVersion -eq $InternetVersion -and -not $force) {
 		Write-Host "Local and internet version are equal. No updates needed." -ForegroundColor Yellow
 	} else {
 		try {
-			if ($LocalVersion -eq $InternetVersion -and $force -eq $true) {
-				Write-Host "Force update local modules" -ForegroundColor Yellow
+			if ($LocalVersion -eq $InternetVersion -and $force) {
+				Write-Host "Forcing update of local modules" -ForegroundColor Yellow
 			} else {
-				Write-Host "Local version updated from '" -ForegroundColor Gray -NoNewline
+				Write-Host "Updating local version from '" -ForegroundColor Gray -NoNewline
 				Write-Host "$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build).$($LocalVersion.Revision)" -ForegroundColor Yellow -NoNewline
 				Write-Host "' to '" -ForegroundColor Gray -NoNewline
 				Write-Host "$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build).$($InternetVersion.Revision)" -ForegroundColor Yellow -NoNewline
