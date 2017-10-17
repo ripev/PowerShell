@@ -4,6 +4,6 @@
     "\\CustomSystem",
     "\\MAAPSModule"
   ],
-  "SelectedNode": "\\CustomSystem\\CustomSystem.psm1",
+  "SelectedNode": "\\MAAPSModule\\MAAPSModule.psd1",
   "PreviewInSolutionExplorer": false
 }
