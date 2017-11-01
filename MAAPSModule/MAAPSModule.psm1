@@ -355,10 +355,14 @@ Function Get-File {
     .LINK
         https://github.com/ripev/PowerShell/
 #>
-	Param([Parameter(Mandatory=$true,Position=1)][String]$url)
+	Param(
+		[Parameter(Mandatory=$true,Position=0)][String]$url,
+		[Parameter(Mandatory=$false,Position=1)][switch]$OverWrite
+	)
 	$filename = Split-Path -leaf $url
 	$location = (Get-Location).Path
 	$file = "$location\$filename"
+	if ($OverWrite) {Remove-Item $file -Force -ErrorAction SilentlyContinue}
 	if ((Test-Path $file) -eq "True") {
 		Write-Host "File " -NoNewline
 		Write-Host "'$filename'" -f Cyan -NoNewline
@@ -368,11 +372,11 @@ Function Get-File {
 		Write-Host "[y] Yes or " -NoNewline
 		Write-Host "[N] No"  -f Yellow -NoNewline
 		Write-Host " (Default is [N]):" -NoNewline
-		$Overwrite = Read-Host
-		if ($Overwrite -eq "Y") {
+		$OverwriteReq = Read-Host
+		if ($OverwriteReq -eq "Y") {
 			Remove-Item $file -Recurse
 			(new-object net.webclient).DownloadFile("$url","$file")
-		} else {Exit}
+		} else {Write-Host "Cannot overwrite file, use -overwrite switch instead!" -ForegroundColor DarkRed}
 	}
 	(new-object net.webclient).DownloadFile("$url","$file")
 }
