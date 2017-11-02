@@ -342,7 +342,7 @@ Function Get-File {
         Download file from URL
 
     .DESCRIPTION
-        Use (new-object net.webclient).DownloadFile
+        Using BitsTransfer
 
     .PARAMETER name
         Use url for download file to current folder
@@ -373,12 +373,10 @@ Function Get-File {
 		Write-Host "[N] No"  -f Yellow -NoNewline
 		Write-Host " (Default is [N]):" -NoNewline
 		$OverwriteReq = Read-Host
-		if ($OverwriteReq -eq "Y") {
-			Remove-Item $file -Recurse
-			(new-object net.webclient).DownloadFile("$url","$file")
-		} else {Write-Host "Cannot overwrite file, use -overwrite switch instead!" -ForegroundColor DarkRed}
+		if ($OverwriteReq -eq "Y") {Remove-Item $file -Force}
+		else {Write-Host "Cannot overwrite file, use -overwrite switch instead!" -ForegroundColor DarkRed;Break}
 	}
-	(new-object net.webclient).DownloadFile("$url","$file")
+	Start-BitsTransfer $url -DisplayName "Downloading" -Description $url
 }
 
 Function Set-MAAAliases {
