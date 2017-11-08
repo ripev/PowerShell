@@ -575,14 +575,16 @@ Function Get-ComputerInfo {
 		$CPUCount = $CPUInfo.Count
 		$CPUInfo = $CPUInfo[0]
 	}
+	$AvailableCores = $CPUCount * $CPUInfo.NumberOfLogicalProcessors
 	$OutputItem = New-Object Object
 	$OutputItem | Add-Member NoteProperty "ServerName" -value $CPUInfo.SystemName
 	$OutputItem | Add-Member NoteProperty "Processor" -value $CPUInfo.Name
 	$OutputItem | Add-Member NoteProperty "Model" -value $CPUInfo.Description
 	$OutputItem | Add-Member NoteProperty "Manufacturer" -value $CPUInfo.Manufacturer
-	$OutputItem | Add-Member NoteProperty "Count" -value $CPUCount
+	$OutputItem | Add-Member NoteProperty "ProcessorCount" -value $CPUCount
 	$OutputItem | Add-Member NoteProperty "PhysicalCores" -value $CPUInfo.NumberOfCores
 	$OutputItem | Add-Member NoteProperty "LogicalCores" -value $CPUInfo.NumberOfLogicalProcessors
+	$OutputItem | Add-Member NoteProperty "AvailableCores" -value $AvailableCores
 	$OutputItem | Add-Member NoteProperty "CPU_L2CacheSize" -value $CPUInfo.L2CacheSize
 	$OutputItem | Add-Member NoteProperty "CPU_L3CacheSize" -value $CPUInfo.L3CacheSize
 	#$OutputItem | Add-Member NoteProperty "Sockets" -value $CPUInfo.SocketDesignation
