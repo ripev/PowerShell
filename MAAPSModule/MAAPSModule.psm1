@@ -562,7 +562,7 @@ Function Test-SSL {
 Function Get-ComputerInfo {
 	param (
 		[Parameter(Mandatory=$false,Position=0,ValueFromPipeline=$true)]
-			[string] $Name
+			[string] $Name = "localhost"
 	)
 	$Output=@()
 	$CPUInfo = Get-WmiObject Win32_Processor -ComputerName $Name
