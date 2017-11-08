@@ -578,14 +578,14 @@ Function Get-ComputerInfo {
 	$OutputItem = New-Object Object
 	$OutputItem | Add-Member NoteProperty "ServerName" -value $CPUInfo.SystemName
 	$OutputItem | Add-Member NoteProperty "Processor" -value $CPUInfo.Name
-	$OutputItem | Add-Member NoteProperty "Count" -value $CPUCount
 	$OutputItem | Add-Member NoteProperty "Model" -value $CPUInfo.Description
 	$OutputItem | Add-Member NoteProperty "Manufacturer" -value $CPUInfo.Manufacturer
+	$OutputItem | Add-Member NoteProperty "Count" -value $CPUCount
 	$OutputItem | Add-Member NoteProperty "PhysicalCores" -value $CPUInfo.NumberOfCores
+	$OutputItem | Add-Member NoteProperty "LogicalCores" -value $CPUInfo.NumberOfLogicalProcessors
 	$OutputItem | Add-Member NoteProperty "CPU_L2CacheSize" -value $CPUInfo.L2CacheSize
 	$OutputItem | Add-Member NoteProperty "CPU_L3CacheSize" -value $CPUInfo.L3CacheSize
-	$OutputItem | Add-Member NoteProperty "Sockets" -value $CPUInfo.SocketDesignation
-	$OutputItem | Add-Member NoteProperty "LogicalCores" -value $CPUInfo.NumberOfLogicalProcessors
+	#$OutputItem | Add-Member NoteProperty "Sockets" -value $CPUInfo.SocketDesignation
 	$OutputItem | Add-Member NoteProperty "OS_Name" -value $OSInfo.Caption
 	$OutputItem | Add-Member NoteProperty "OS_Version" -value $OSInfo.Version
 	$OutputItem | Add-Member NoteProperty "TotalPhysical_Memory_GB" -value $PhysicalMemory
