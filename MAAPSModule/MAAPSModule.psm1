@@ -558,3 +558,39 @@ Function Test-SSL {
 			Write-Host ""
 	}
 }
+
+Function Get-ComputerInfo {
+	param (
+		[Parameter(Mandatory=$false,Position=0,ValueFromPipeline=$true)]
+			[string] $Name
+	)
+	$Output=@()
+	$CPUInfo = Get-WmiObject Win32_Processor -ComputerName $Name
+	$OSInfo = Get-WmiObject Win32_OperatingSystem -ComputerName $Name
+	$OSTotalVirtualMemory = [math]::round($OSInfo.TotalVirtualMemorySize / 1MB, 2)
+	$OSTotalVisibleMemory = [math]::round(($OSInfo.TotalVisibleMemorySize / 1MB), 2)
+	$PhysicalMemory = Get-WmiObject CIM_PhysicalMemory -ComputerName $Name | Measure-Object -Property capacity -Sum | % { [Math]::Round(($_.sum / 1GB), 2) }
+	$CPUCount = "1"
+	if ($CPUInfo.Count -ge "2") {
+		$CPUCount = $CPUInfo.Count
+		$CPUInfo = $CPUInfo[0]
+	}
+	$OutputItem = New-Object Object
+	$OutputItem | Add-Member NoteProperty "ServerName" -value $CPUInfo.SystemName
+	$OutputItem | Add-Member NoteProperty "Processor" -value $CPUInfo.Name
+	$OutputItem | Add-Member NoteProperty "Count" -value $CPUCount
+	$OutputItem | Add-Member NoteProperty "Model" -value $CPUInfo.Description
+	$OutputItem | Add-Member NoteProperty "Manufacturer" -value $CPUInfo.Manufacturer
+	$OutputItem | Add-Member NoteProperty "PhysicalCores" -value $CPUInfo.NumberOfCores
+	$OutputItem | Add-Member NoteProperty "CPU_L2CacheSize" -value $CPUInfo.L2CacheSize
+	$OutputItem | Add-Member NoteProperty "CPU_L3CacheSize" -value $CPUInfo.L3CacheSize
+	$OutputItem | Add-Member NoteProperty "Sockets" -value $CPUInfo.SocketDesignation
+	$OutputItem | Add-Member NoteProperty "LogicalCores" -value $CPUInfo.NumberOfLogicalProcessors
+	$OutputItem | Add-Member NoteProperty "OS_Name" -value $OSInfo.Caption
+	$OutputItem | Add-Member NoteProperty "OS_Version" -value $OSInfo.Version
+	$OutputItem | Add-Member NoteProperty "TotalPhysical_Memory_GB" -value $PhysicalMemory
+	$OutputItem | Add-Member NoteProperty "TotalVirtual_Memory_MB" -value $OSTotalVirtualMemory
+	$OutputItem | Add-Member NoteProperty "TotalVisable_Memory_MB" -value $OSTotalVisibleMemory
+	$Output += $OutputItem
+	$Output
+}
