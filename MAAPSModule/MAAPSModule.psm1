@@ -570,7 +570,7 @@ Function Get-CompInfo {
 	$OSTotalVirtualMemory = [math]::round($OSInfo.TotalVirtualMemorySize / 1MB, 2)
 	$OSTotalVisibleMemory = [math]::round(($OSInfo.TotalVisibleMemorySize / 1MB), 2)
 	$PhysicalMemory = Get-WmiObject CIM_PhysicalMemory -ComputerName $Name | Measure-Object -Property capacity -Sum | % { [Math]::Round(($_.sum / 1GB), 2) }
-	$CPUCount = "1"
+	[int]$CPUCount = "1"
 	if ($CPUInfo.Count -ge "2") {
 		$CPUCount = $CPUInfo.Count
 		$CPUInfo = $CPUInfo[0]
