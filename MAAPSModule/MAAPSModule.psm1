@@ -559,7 +559,7 @@ Function Test-SSL {
 	}
 }
 
-Function Get-ComputerInfo {
+Function Get-CompInfo {
 	param (
 		[Parameter(Mandatory=$false,Position=0,ValueFromPipeline=$true)]
 			[string] $Name = "localhost"
