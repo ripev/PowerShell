@@ -1,10 +1,36 @@
-﻿<#$env:PSModulePath -split ";"
-add new path with folder name like module.psm1 (file with functions) name#>
-
-$MAAPSModuleURLManifest = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
+﻿$MAAPSModuleURLManifest = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
 $MAAPSModuleURL = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psm1"
 
 Function Output {
+<#
+	.SYNOPSIS
+		Output on screen (and file) some string
+
+	.DESCRIPTION
+		Write-Host and Write-Output in one flacon :)
+
+	.PARAMETER str
+		String to output
+
+	.PARAMETER outfile
+		File path to output
+
+	.PARAMETER color
+		Colorized output to display
+
+	.EXAMPLE
+		Output -str "Kalya-malya" -color Red
+
+		Output "Kalya-malya" on display with red color
+
+	.EXAMPLE
+		Output -str "Kalya-malya" -outfile .\output.txt
+
+		Output "Kalya-malya" on display with white color and to file .\output.txt
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
 	Param (
 		[string] $str,
 		[string] $outfile,
@@ -14,7 +40,27 @@ Function Output {
 	Write-Host "$str" -f $color
 }
 
+Function Test-Admin {
+<#
+	.SYNOPSIS
+		Return false if script rinning without elevated admin permissions
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
+
+    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
+    $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+}
+
 Function Get-MAAPSModuleInternetVersion {
+<#
+	.SYNOPSIS
+		Get current MAAPSModule version from Github
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
 	$MAAPSModuleURLManifestDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURLManifest)
 	$MAAPSModuleURLDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURL)
 	$RandomNameString = Get-RandomName
@@ -32,10 +78,24 @@ Function Get-MAAPSModuleInternetVersion {
 }
 
 Function Get-MAAPSModuleLocalVersion {
+<#
+	.SYNOPSIS
+		Get current installed MAAPSModule version from profile
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
 	(Get-Module MAAPSModule).Version
 }
 
 Function Get-MAAPSModuleVerions {
+<#
+	.SYNOPSIS
+		Get local and github versions of MAAPSModule
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
 	$InternetVersion = (Get-MAAPSModuleInternetVersion).Version
 	Write-Host "Internet version of modules is:`t" -ForegroundColor Yellow -NoNewline
 	Write-Host "$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build).$($InternetVersion.Revision)" -ForegroundColor Green
@@ -44,7 +104,39 @@ Function Get-MAAPSModuleVerions {
 	Write-Host "$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build).$($LocalVersion.Revision)" -ForegroundColor Green
 }
 
+Function Get-MAACommands {
+<#
+	.SYNOPSIS
+		Show MAA module commands
+
+	.DESCRIPTION
+		Alias for get-command from MAAPSModule
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
+    Get-Command | Where-Object {$_.ModuleName -eq "MAAPSModule"}
+}
+
 Function Update-MAAPSModule {
+<#
+	.SYNOPSIS
+		Update MAAPSmodule
+
+	.DESCRIPTION
+		Update MAAPSModule from github
+
+	.PARAMETER force
+		Update local modules even versions is the same
+
+	.EXAMPLE
+		Update-MAAPSModule
+
+		Update module
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
 	Param(
 		[Parameter(Mandatory=$false,Position=0)][switch]$force
 	)
@@ -80,15 +172,22 @@ Function Update-MAAPSModule {
 }
 
 Function Get-DCCredential {
-	# if credfile does not exist, create with command:
-	# $Credential.Password | ConvertFrom-SecureString | Out-File $env:USERPROFILE\.ssh\andrey.makovetsky.cred
-	$CredFilePath = "$env:USERPROFILE\.ssh\andrey.makovetsky.cred"
+<#
+	.SYNOPSIS
+		Subfunction used in connect functions (Connect-Remote, etc.)
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
+	$CredFilePath = "$($env:USERPROFILE)\.ssh\$($env:USERNAME).cred"
 	$CredFile = Get-Item $CredFilePath
 	try {
 		$PwdSecureString = Get-Content "$CredFile" | ConvertTo-SecureString -ErrorAction Stop
 	} catch {
-		Output -outfile $log -str "File with credentials not found at '$CredFile'" -color Red
-		#Exit 1
+		Output -str "File with credentials not found at '$CredFile'" -color Red
+		Output -str "You can create credential file with folowing command:" -color Gray
+		Output -str '$Credential = Get-Credential' -color Yellow
+		Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File $($env:USERPROFILE)\.ssh\$($env:USERNAME).cred'
 	}
 	New-Object System.Management.Automation.PSCredential -ArgumentList $($CredFile.BaseName), $PwdSecureString
 }
@@ -107,7 +206,7 @@ Function Get-LocalDisk {
     Get-Volume | Sort-Object DriveLetter | Where-Object {$_.DriveType -match "Fixed"} | Format-Table -AutoSize
 }
 
-Function Get-SQLInstances {
+Function Get-RunningSQLInstances {
 <#
     .SYNOPSIS
         Show running SQL instances
@@ -118,48 +217,47 @@ Function Get-SQLInstances {
     .LINK
         https://github.com/ripev/PowerShell/
 #>
-    $Instances = Get-Service | Where-Object {($_.DisplayName -like 'SQL Server (*') -and ($_.Status -like 'Running')}
-    $Instances = ($Instances.DisplayName).Substring(12)
-    $Output=@()
-    foreach ($instance in $Instances) {
-        $Instance = $Instance.Substring(0,($Instance.Length-1))
-        if ($Instance -eq 'MSSQLSERVER') {$Instance = "(local)"} else {$instance = "(local)\" + $instance}
-        $OutputItem = New-Object Object
-        $OutputItem | Add-Member NoteProperty "name" $instance
-        $Output += $OutputItem
-    }
-    $Output
+    Get-Service | Where-Object {($_.DisplayName -like 'SQL Server (*') -and ($_.Status -like 'Running')}
 }
 
 Function Get-SQLDbs {
 <#
-    .SYNOPSIS
-        Show SQL db in selected instance
+	.SYNOPSIS
+		Show SQL db in selected instance
 
-    .DESCRIPTION
-        Show SQL db in selected instance
+	.DESCRIPTION
+		Show SQL db in selected instance with MDB and LDF sized
 
-    .PARAMETER  Instance
-        Set instance parameter, from where to show DBs. Default is localhost
+	.PARAMETER Instance
+		Set instance parameter, from where to show DBs. Default is localhost
 
-    .EXAMPLE
-         Get-SQLDbs -Instance localhost
+	.EXAMPLE
+		Get-SQLDbs -Instance localhost
 
-         Show list of DB from default instance
+		Show list of DB from default instance
 
-    .EXAMPLE
-         Get-SQLDbs -Instance "localhost,1102"
+	.EXAMPLE
+		Get-SQLDbs -Instance "localhost,1102"
 
-         Show list of DB from instance with port 1102
+		Show list of DB from instance with port 1102
 
-    .LINK
-        https://github.com/ripev/PowerShell/
+	.LINK
+		https://github.com/ripev/PowerShell/
 #>
-    Param ($instance = "localhost")
-    [System.Reflection.Assembly]::LoadWithPartialName(‘Microsoft.SqlServer.SMO’) | Out-Null
-    $server = New-Object (‘Microsoft.SqlServer.Management.Smo.Server’) "$instance"
-    $DBs = $server.databases | Where-Object {$_.name -notmatch 'master' -and $_.name -notmatch 'model' -and $_.name -notmatch 'msdb' -and $_.name -notmatch 'tempdb'} #все бд
+    Param (
+		[parameter(Mandatory=$true,ValueFromPipeline=$true)]
+			[String[]] $instance = "localhost",
+		[parameter(Mandatory=$false)]
+			[Switch] $all
+	)
+	$location = Get-Location
+    [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | Out-Null
+    $server = New-Object ('Microsoft.SqlServer.Management.Smo.Server') "$instance"
+    $DBs = $server.databases
     $DBs = $DBs.Name
+	if (!$all) {
+		$DBs = $DBs | Where-Object {$_ -notmatch 'master' -and $_ -notmatch 'model' -and $_ -notmatch 'msdb' -and $_ -notmatch 'tempdb'} #все бд
+	}
     $Output=@()
     foreach ($db in $DBs) {
 		
@@ -176,7 +274,7 @@ Function Get-SQLDbs {
 				(select sum(size) from fs where type = 1 and fs.database_id = db.database_id) LogFileSizeMB
 			from sys.databases db where name = '$db'
 		"
-		$dbinfo = Invoke-Sqlcmd -ServerInstance $instance -Query $query
+		$dbinfo = Invoke-Sqlcmd -ServerInstance "$instance" -Query $query
         $OutputItem = New-Object Object
         $OutputItem | Add-Member NoteProperty "Name" $db
 		$OutputItem | Add-Member NoteProperty "DataFileSizeMB" $dbinfo.DataFileSizeMB
@@ -184,35 +282,36 @@ Function Get-SQLDbs {
         $Output += $OutputItem
     }
     $Output
+	Set-Location $location
 }
 
 Function Get-RandomPassword {
 <#
-    .SYNOPSIS
-        Generate passowrd
+	.SYNOPSIS
+		Generate passowrd
 
-    .DESCRIPTION
-        Generate password with selected length. Default is 20
+	.DESCRIPTION
+		Generate password with selected length and copy to clipboard. Default is 20.
 
-    .PARAMETER   length
-        Integer parameter shows whith password length should be
+	.PARAMETER length
+		Integer parameter shows whith password length should be
 
-    .EXAMPLE
-         Get-RandomPassword
+	.EXAMPLE
+		Get-RandomPassword
 
-         Generate password with length 20
+		Generate password with length 20
 
-    .EXAMPLE
-         Get-RandomPassword -length 13
+	.EXAMPLE
+		Get-RandomPassword -length 13
 
-         Generate password with length 13
+		Generate password with length 13
 
-    .LINK
-        https://github.com/ripev/PowerShell/
+	.LINK
+		https://github.com/ripev/PowerShell/
 #>
 	param(
 		[int]$length = 20,
-		$characters ='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789~![]%^*-+=:.?_'
+		$characters ='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~![]%^*-+=:.?_'
 	)
 	# select random characters
 	$random = 1..$length | ForEach-Object { Get-Random -Maximum $characters.length }
@@ -226,22 +325,22 @@ Function Get-RandomPassword {
 
 Function Pause {
 <#
-    .SYNOPSIS
-        Pause scripting
+	.SYNOPSIS
+		Pause scripting
 
-    .DESCRIPTION
-        Pause scripting with message and waiting user interacting
+	.DESCRIPTION
+		Pause scripting with message and waiting user interacting
 
-    .PARAMETER   message
-        Set message to display. Default is "Press any key..."
+	.PARAMETER message
+		Set message to display. Default is "Press any key..."
 
-    .EXAMPLE
-         Pause
+	.EXAMPLE
+		Pause
 
-         Pause script
+		Pause script
 
-    .LINK
-        https://github.com/ripev/PowerShell/
+	.LINK
+		https://github.com/ripev/PowerShell/
 #>
     param ($message = "Press any key...")
 
@@ -260,20 +359,55 @@ Function Pause {
 
 Function Get-NotStartedSVCs {
 <#
-    .SYNOPSIS
-        Shows not started services
+	.SYNOPSIS
+		Shows not started services
 
-    .DESCRIPTION
-        Shows services that not started but have startup type Automatic on localhost or $srv
+	.DESCRIPTION
+		Shows services that not started but have startup type Automatic on localhost or selected server
 
-    .LINK
-        https://github.com/ripev/PowerShell/
+	.PARAMETER srv
+		Get not started servives on selected server
+
+	.EXAMPLE
+		Get-NotStartedSVCs
+
+		Get not started services on localmachine
+
+	.EXAMPLE
+		Get-NotStartedSVCs -srv huston
+
+		Get not started services on 'huston' server
+
+	.LINK
+		https://github.com/ripev/PowerShell/
 #>
     param ($srv = "localhost")
     Get-Service -ComputerName $srv | Where-Object {$_.starttype -match "Automatic" -and $_.status -ne "Running"}
 }
 
 Function Get-RandomName {
+<#
+	.SYNOPSIS
+		Generating random name
+
+	.DESCRIPTION
+		Generating random name with default length 20 or selected
+
+	.PARAMETER length
+		Integer parameter shows whith password length should be
+
+	.EXAMPLE
+		Get-RandomName
+
+		Generate random name with length 20
+
+	.EXAMPLE
+		Get-RandomName -lengtn 40
+
+		Generate random name with length 40
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
 	param(
 		[int]$length = 20,$characters ='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789()=+_-'
 	)
@@ -282,51 +416,56 @@ Function Get-RandomName {
 	[String]$characters[$random]
 }
 
-Function Get-MAACommands {
-<#
-    .SYNOPSIS
-        Show MAA module commands
-
-    .DESCRIPTION
-        Alias for get-command from MAAPSModule
-
-    .LINK
-        https://github.com/ripev/PowerShell/
-#>
-    Get-Command | Where-Object {$_.ModuleName -eq "MAAPSModule"}
-}
-
 Function Invoke-ABTPSScript {
 <#
-    .SYNOPSIS
-        Run script from ABT source
+	.SYNOPSIS
+		Run script from ABT source
 
-    .DESCRIPTION
-        Get scrip content from ABT site and execute
+	.DESCRIPTION
+		Get scrip content from ABT site and execute
 
-    .PARAMETER name
-        Set script name parameter, wich should be executed
+	.PARAMETER name
+		Set script name parameter, wich should be executed
 
-    .EXAMPLE
-         Invoke-ABTPSScript test
+	.EXAMPLE
+		Invoke-ABTPSScript test
 
-         Download and execute script from link https://avicom.ru/uploader/ps1/test.ps1
+		Download and execute script from link https://avicom.ru/uploader/ps1/test.ps1
 
-    .LINK
-        https://github.com/ripev/PowerShell/
+	.LINK
+		https://github.com/ripev/PowerShell/
 #>
     Param ([Parameter(Mandatory=$true,Position=1)][String]$name)
     $url = "https://avicom.ru/uploader/ps1/" + $name + ".ps1"
-	Invoke-Expression ((new-object net.webclient).DownloadString($url))
+	Invoke-Expression ((new-object net.webclient).DownloadString("$url"))
 }
 
 Function Connect-Remote {
 <#
-    .SYNOPSIS
-        Connect to SSL RemotePS 
+	.SYNOPSIS
+		Connect to SSL RemotePS
 
-    .LINK
-        https://github.com/ripev/PowerShell/
+	.DESCRIPTION
+		Alias for 'Enter-PSSession -ComputerName $srv -UseSSL -Credential $Credential' command
+
+	.PARAMETER srv
+		Server address to connect
+
+	.PARAMETER credential
+		User credential
+
+	.EXAMPLE
+		Connect-Remote -srv huston.com
+
+		Connect remote powershell to huston.com server with current user credential
+
+	.EXAMPLE
+		Connect-Remote -srv huston.com -credential (Get-Credential 'vasya.pupkin')
+
+		Get not started services on 'huston' server with requesting login/password for vasya.pupkin
+
+	.LINK
+		https://github.com/ripev/PowerShell/
 #>
     param (
 		[Parameter(Mandatory=$true,Position=0)] [ValidateNotNullOrEmpty()] [string] $srv,
@@ -338,26 +477,37 @@ Function Connect-Remote {
 
 Function Get-File {
 <#
-    .SYNOPSIS
-        Download file from URL
+	.SYNOPSIS
+		Download file from URL
 
-    .DESCRIPTION
-        Using BitsTransfer
+	.DESCRIPTION
+		Using BitsTransfer or (new-object net.webclient).DownloadFile applets
 
-    .PARAMETER name
-        Use url for download file to current folder
+	.PARAMETER name
+		Use url for download file to current folder
 
-    .EXAMPLE
-         Get-File http://download.ru/example_file.zip
+	.EXAMPLE
+		Get-File http://download.ru/example_file.zip
 
-         Download file example_file.zip from url to current folder with example_file.zip name
+		Download file example_file.zip from url to current folder with example_file.zip name with net.webclient
 
-    .LINK
-        https://github.com/ripev/PowerShell/
+	.EXAMPLE
+		Get-File http://download.ru/example_file.zip -overwrite
+
+		Download file example_file.zip from url to current folder and overwrite local file if exists
+
+	.EXAMPLE
+		Get-File http://download.ru/example_file.zip -bits
+
+		Download file example_file.zip from url to current folder with BitsTransfer (display progress indicator)
+
+	.LINK
+		https://github.com/ripev/PowerShell/
 #>
 	Param(
 		[Parameter(Mandatory=$true,Position=0)][String]$url,
-		[Parameter(Mandatory=$false,Position=1)][switch]$OverWrite
+		[Parameter(Mandatory=$false,Position=1)][switch]$OverWrite,
+		[Parameter(Mandatory=$false,Position=2)][switch]$bits
 	)
 	$filename = Split-Path -leaf $url
 	$location = (Get-Location).Path
@@ -376,16 +526,20 @@ Function Get-File {
 		if ($OverwriteReq -eq "Y") {Remove-Item $file -Force}
 		else {Write-Host "Cannot overwrite file, use -overwrite switch instead!" -ForegroundColor DarkRed;Break}
 	}
-	Start-BitsTransfer $url -DisplayName "Downloading" -Description $url
+	if ($bits) {
+		Start-BitsTransfer $url -DisplayName "Downloading" -Description $url
+	} else {
+		(new-object net.webclient).DownloadFile("$url","$file")
+	}
 }
 
 Function Set-MAAAliases {
 <#
-    .SYNOPSIS
-        Set aliases
+	.SYNOPSIS
+		Set aliases
 
-    .LINK
-        https://github.com/ripev/PowerShell/
+	.LINK
+		https://github.com/ripev/PowerShell/
 #>
 	$AliasPath = (Get-Variable profile).Value
 	$PresentAliases = Get-Content $AliasPath
@@ -400,12 +554,17 @@ Function Set-MAAAliases {
 
 Function Get-StoppedAppPools {
 <#
-    .SYNOPSIS
-        Get stopped IIS AppPools
+	.SYNOPSIS
+		Get stopped IIS AppPools
 
-    .LINK
+	.LINK
         https://github.com/ripev/PowerShell/
 #>
+	if ((Test-Admin) -eq $false) {
+		Output "Please run scrip with Admin rignts" -color Red
+		Pause "press any key to exit";Break
+	}
+
 	$LoadedModules = Get-Module
 	$IsModuleLoaded = $false
 	foreach ($LoadedModule in $LoadedModules) {
@@ -413,43 +572,41 @@ Function Get-StoppedAppPools {
 		$IsModuleLoaded = $True}}
 	if ($IsModuleLoaded -eq $False) {
 		Import-Module WebAdministration}
-
 	Get-ChildItem IIS:\AppPools\ | Where-Object {$_.state -ne "started"}
-
 }
 
 Function Get-WAS7daysErrors {
 <#
-    .SYNOPSIS
-        Get eventlog error for ASP.NET for last 7 days
+	.SYNOPSIS
+		Get eventlog error for ASP.NET for last 7 days
 
-    .LINK
-        https://github.com/ripev/PowerShell/
+	.LINK
+		https://github.com/ripev/PowerShell/
 #>
 	Get-EventLog -LogName system -After ((Get-Date).AddDays(-7)) | Where-Object {$_.source -eq "WAS" -and $_.EntryType -ne "Information"}
 }
 
 Function Invoke-DCsCommand {
 <#
-    .SYNOPSIS
-        Invoke command on DC computers
+	.SYNOPSIS
+		Invoke command on DC computers
 
 	.DESCRIPTION
 		Can be used with predefined credentials
 
-    .EXAMPLE
-         Invoke-DCsCommand -Command "Get-LocalDisk"
+	.EXAMPLE
+		Invoke-DCsCommand -Command "Get-LocalDisk"
 
-         Authorize and run command Get-LocalDisk on dc0[1-5]
+		Authorize and run command Get-LocalDisk on dc0[1-5]
 
-    .EXAMPLE
-         $cred = Get-Credential "User.Name"
-		 Invoke-DCsCommand -Credential $cred -Command "Get-LocalDisk"
+	.EXAMPLE
+		$cred = Get-Credential "User.Name"
+		Invoke-DCsCommand -Credential $cred -Command "Get-LocalDisk"
 
-         Authorize and run command Get-LocalDisk on dc0[1-5]
+		Authorize and run command Get-LocalDisk on dc0[1-5]
 	
-    .LINK
-        https://github.com/ripev/PowerShell/
+	.LINK
+		https://github.com/ripev/PowerShell/
 #>
 	Param(
 		[Parameter(Mandatory=$true,Position=0)] [String] $Command,
@@ -560,6 +717,16 @@ Function Test-SSL {
 }
 
 Function Get-CompInfo {
+<#
+	.SYNOPSIS
+		Get hardware invormation
+
+	.DESCRIPTION
+		Show CPU and RAM information
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
 	param (
 		[Parameter(Mandatory=$false,Position=0,ValueFromPipeline=$true)]
 			[string] $Name = "localhost"
