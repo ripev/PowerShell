@@ -1,4 +1,15 @@
-﻿Function Get-LoggedOnUser {
+﻿Function Get-MAAFunctions {
+<#
+	.SYNOPSIS
+		Show MAA functions
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
+    Get-Command | Where-Object {$_.ModuleName -eq "MAAFunctions"}
+}
+
+Function Get-LoggedOnUser {
 	Param ([Parameter(Mandatory=$false,Position=0)][string] $computername = "localhost")
 
 	$regexa = '.+Domain="(.+)",Name="(.+)"$'
