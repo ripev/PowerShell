@@ -124,7 +124,7 @@ Function Invoke-SQLCustomScript {
 		Sql script to query
 
 	.EXAMPLE
-		Invoke-SQLCustomScript -SQLInstance localhost -SQLDBName master -SQLScript "Select name,user_access_desc" from sys.database"
+		Invoke-SQLCustomScript -SQLInstance localhost -SQLDBName master -SQLScript "Select name,user_access_desc from sys.databases"
 
 		Get all databases from default local SQL server with state
 
@@ -137,11 +137,20 @@ Function Invoke-SQLCustomScript {
 		[Parameter(Mandatory=$true,Position=1)]
 			[String[]] $SQLDBName,
 		[Parameter(Mandatory=$true,Position=3)]
-			[String[]] $SQLScript
+			[String[]] $SQLScript,
+		[Parameter(Mandatory=$false,Position=4)]
+			[String[]] $SQLLogin,
+		[Parameter(Mandatory=$false,Position=5)]
+			[String[]] $SQLPassword
 	)
 	$StartLocation = Get-Location
 	$SqlConnection = New-Object System.Data.SqlClient.SqlConnection
-	$SqlConnection.ConnectionString = "Server = $SQLInstance; Database = $SQLDBName; Integrated Security = True"
+	$SqlConnection.ConnectionString = "Server = $SQLInstance; Database = $SQLDBName; Integrated Security = "
+	if (!$SQLLogin) {
+		$SqlConnection.ConnectionString += "true;"
+	} else {
+		$SqlConnection.ConnectionString += "false; user id = $($SQLLogin); password = $($SQLPassword);"
+	}
 	$SqlCmd = New-Object System.Data.SqlClient.SqlCommand
 	$SqlCmd.CommandText = $SQLScript
 	$SqlCmd.Connection = $SqlConnection
