@@ -97,3 +97,67 @@ Function Test-Admin {
     $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
     $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 }
+
+Function Invoke-SQLCustomScript {
+<#
+	.SYNOPSIS
+		Sql script without installing Management Studio with integrated (windows) auth
+
+	.PARAMETER SQLInstance
+		SQL server adress
+
+	.PARAMETER SQLDBName
+		Database name
+
+	.PARAMETER SQLScript
+		Sql script to query
+
+	.EXAMPLE
+		Invoke-SQLCustomScript -SQLInstance localhost -SQLDBName master -SQLScript "Select name,user_access_desc" from sys.database"
+
+		Get all databases from default local SQL server with state
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
+	Param (
+		[Parameter(Mandatory=$true,Position=0)]
+			[String[]] $SQLInstance,
+		[Parameter(Mandatory=$true,Position=1)]
+			[String[]] $SQLDBName,
+		[Parameter(Mandatory=$true,Position=3)]
+			[String[]] $SQLScript
+	)
+	$StartLocation = Get-Location
+	$SqlConnection = New-Object System.Data.SqlClient.SqlConnection
+	$SqlConnection.ConnectionString = "Server = $SQLInstance; Database = $SQLDBName; Integrated Security = True"
+	$SqlCmd = New-Object System.Data.SqlClient.SqlCommand
+	$SqlCmd.CommandText = $SQLScript
+	$SqlCmd.Connection = $SqlConnection
+	$SqlAdapter = New-Object System.Data.SqlClient.SqlDataAdapter
+	$SqlAdapter.SelectCommand = $SqlCmd
+	$DataSet = New-Object System.Data.DataSet
+	$SqlAdapter.Fill($DataSet) | Out-Null
+	$SqlConnection.Close()
+	$DataSet.Tables[0]
+	Set-Location $StartLocation
+}
+
+Function New-CustomGuid {
+<#
+	.SYNOPSIS
+		Generates GUID on system without New-GUID commandlet
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
+	[string]$guid = ""
+	[array]$guidMask = "8","4","4","4","12"
+	[string]$chars = "ABCDEF0123456789"
+	foreach ($g in $guidMask) {
+		$random = 1..$g | ForEach-Object { Get-Random -Maximum $chars.length }
+        $private:ofs=""
+        $guid += "-" + [String]$chars[$random]
+	}
+    $guid.Substring(1,36)
+}

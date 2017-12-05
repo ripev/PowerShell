@@ -40,19 +40,6 @@ Function Output {
 	Write-Host "$str" -f $color
 }
 
-Function Test-Admin {
-<#
-	.SYNOPSIS
-		Return false if script rinning without elevated admin permissions
-
-	.LINK
-		https://github.com/ripev/PowerShell/
-#>
-
-    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
-    $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
-}
-
 Function Get-MAAPSModuleInternetVersion {
 <#
 	.SYNOPSIS
@@ -169,6 +156,17 @@ Function Update-MAAPSModule {
 			Write-Host "$($Error.Exception)" -ForegroundColor Red
 		}
 	}
+}
+
+Function Update-MAAFunctions {
+<#
+	.SYNOPSIS
+		Install or update MAA Functions to system folder
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
+	iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/ripev/PowerShell/master/MAAFunctions/MAAFunctionsInstall.ps1'))
 }
 
 Function Get-DCCredential {
