@@ -45,3 +45,55 @@
 	}
 
 }
+
+Function Output {
+<#
+	.SYNOPSIS
+		Output on screen (and file) some string
+
+	.DESCRIPTION
+		Write-Host and Write-Output in one flacon :)
+
+	.PARAMETER str
+		String to output
+
+	.PARAMETER outfile
+		File path to output
+
+	.PARAMETER color
+		Colorized output to display
+
+	.EXAMPLE
+		Output -str "Kalya-malya" -color Red
+
+		Output "Kalya-malya" on display with red color
+
+	.EXAMPLE
+		Output -str "Kalya-malya" -outfile .\output.txt
+
+		Output "Kalya-malya" on display with white color and to file .\output.txt
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
+	Param (
+		[string] $str,
+		[string] $outfile,
+		[ValidateSet("Black","DarkBlue","DarkGreen","DarkCyan","DarkRed","DarkMagenta","DarkYellow","Gray","DarkGray","Blue","Green","Cyan","Red","Magenta","Yellow","White")][string]$color="White"
+	)
+	if ($outfile) {Write-Output "$str" | Out-File "$outfile" -Encoding utf8 -Append}
+	Write-Host "$str" -f $color
+}
+
+Function Test-Admin {
+<#
+	.SYNOPSIS
+		Return false if script rinning without elevated admin permissions
+
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
+
+    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
+    $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+}
