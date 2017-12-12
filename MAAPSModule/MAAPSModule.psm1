@@ -438,6 +438,49 @@ Function Invoke-ABTPSScript {
 	Invoke-Expression ((new-object net.webclient).DownloadString("$url"))
 }
 
+Function Invoke-DCsCommand {
+<#
+	.SYNOPSIS
+		Invoke command on DC computers
+
+	.DESCRIPTION
+		Can be used with predefined credentials
+
+	.EXAMPLE
+		Invoke-DCsCommand -Command "Get-LocalDisk"
+
+		Authorize and run command Get-LocalDisk on dc0[1-5]
+
+	.EXAMPLE
+		$cred = Get-Credential "User.Name"
+		Invoke-DCsCommand -Credential $cred -Command "Get-LocalDisk"
+
+		Authorize and run command Get-LocalDisk on dc0[1-5]
+	
+	.LINK
+		https://github.com/ripev/PowerShell/
+#>
+	Param(
+		[Parameter(Mandatory=$true,Position=0)] [String] $Command,
+		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential,
+		[switch] $All
+	)
+	if ($Credential -eq $null) {$Credential = Get-DCCredential}
+	if ($All) {
+		$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc04.projectmate.ru","dc05.projectmate.ru","dc06.projectmate.ru"
+	} else {
+		$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc05.projectmate.ru","dc06.projectmate.ru"
+	}
+	$Script = [Scriptblock]::Create($Command)
+	foreach ($srv in $srvs) {
+		"`n Executing command`t" | Write-Host -NoNewline -ForegroundColor Gray
+		"'$Command'" | Write-Host -ForegroundColor Yellow
+		" on " | Write-Host -ForegroundColor Gray -NoNewline
+		"$srv`n" | Write-Host -ForegroundColor DarkCyan
+		Invoke-Command -ComputerName $srv -Credential $Credential -UseSSL -ScriptBlock $Script
+	}
+}
+
 Function Connect-Remote {
 <#
 	.SYNOPSIS
@@ -582,49 +625,6 @@ Function Get-WAS7daysErrors {
 		https://github.com/ripev/PowerShell/
 #>
 	Get-EventLog -LogName system -After ((Get-Date).AddDays(-7)) | Where-Object {$_.source -eq "WAS" -and $_.EntryType -ne "Information"}
-}
-
-Function Invoke-DCsCommand {
-<#
-	.SYNOPSIS
-		Invoke command on DC computers
-
-	.DESCRIPTION
-		Can be used with predefined credentials
-
-	.EXAMPLE
-		Invoke-DCsCommand -Command "Get-LocalDisk"
-
-		Authorize and run command Get-LocalDisk on dc0[1-5]
-
-	.EXAMPLE
-		$cred = Get-Credential "User.Name"
-		Invoke-DCsCommand -Credential $cred -Command "Get-LocalDisk"
-
-		Authorize and run command Get-LocalDisk on dc0[1-5]
-	
-	.LINK
-		https://github.com/ripev/PowerShell/
-#>
-	Param(
-		[Parameter(Mandatory=$true,Position=0)] [String] $Command,
-		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential,
-		[switch] $All
-	)
-	if ($Credential -eq $null) {$Credential = Get-DCCredential}
-	if ($All) {
-		$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc04.projectmate.ru","dc05.projectmate.ru"
-	} else {
-		$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc05.projectmate.ru"
-	}
-	$Script = [Scriptblock]::Create($Command)
-	foreach ($srv in $srvs) {
-		"`n Executing command`t" | Write-Host -NoNewline -ForegroundColor Gray
-		"'$Command'" | Write-Host -ForegroundColor Yellow
-		" on " | Write-Host -ForegroundColor Gray -NoNewline
-		"$srv`n" | Write-Host -ForegroundColor DarkCyan
-		Invoke-Command -ComputerName $srv -Credential $Credential -UseSSL -ScriptBlock $Script
-	}
 }
 
 Function Test-SSL {

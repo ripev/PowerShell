@@ -1,9 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\CustomSystem",
+    "\\MAAFunctions",
     "\\MAAPSModule"
   ],
-  "SelectedNode": "\\Add-Zip.ps1",
+  "SelectedNode": "\\MAAFunctions\\MAAFunctions.psm1",
   "PreviewInSolutionExplorer": false
 }
