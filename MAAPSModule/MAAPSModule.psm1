@@ -201,7 +201,16 @@ Function Get-LocalDisk {
     .LINK
         https://github.com/ripev/PowerShell/
 #>
-    Get-Volume | Sort-Object DriveLetter | Where-Object {$_.DriveType -match "Fixed"} | Format-Table -AutoSize
+	Param(
+		[Parameter(Mandatory=$false,Position=0)][string]$comp="localhost"
+	)
+	Get-WmiObject Win32_Volume -ComputerName $comp | `
+	where {$_.DriveType -eq 3 -and $_.DriveLetter} | `
+	Select-Object `
+		DriveLetter,Label,FileSystem,`
+	@{l="FreeSpace";e={"$([math]::Round(($_.FreeSpace / 1GB), 2)) GB"}},`
+	@{l="Size";e={"$([math]::Round(($_.Capacity / 1GB), 2)) GB"}} | `
+	Sort-Object DriveLetter
 }
 
 Function Get-RunningSQLInstances {
