@@ -181,3 +181,47 @@ Function New-CustomGuid {
 	}
     $guid.Substring(1,36)
 }
+
+Function Test-Port {
+<#
+	.SYNOPSIS
+		Test port connectivity
+	.DESCRIPTION
+		Returning true or false for requested port
+	.PARAMETER ComputerName
+		Defines server address
+		Mandatory parameter
+		No default value.
+	.PARAMETER IPAddress
+		Defines server IP address
+		Mandatory parameter
+		No default value.
+	.PARAMETER Port
+		Port address to check
+		Mandatory parameter
+		No default value.
+	.LINK
+		http://www.travisgan.com/2014/03/use-powershell-to-test-port.html
+#>
+	Param(
+		[parameter(ParameterSetName='ComputerName', Position=0)]
+		[string] $ComputerName,
+
+		[parameter(ParameterSetName='IP', Position=0)]
+		[System.Net.IPAddress] $IPAddress,
+
+		[parameter(Mandatory=$true , Position=1)]
+		[int] $Port
+		)
+
+	$RemoteServer = If ([string]::IsNullOrEmpty($ComputerName)) {$IPAddress} Else {$ComputerName};
+    $test = New-Object System.Net.Sockets.TcpClient;
+	Try {
+		$test.Connect($RemoteServer, $Port);
+	}
+	Catch {
+		$false
+		Exit
+	}
+	$true
+}
