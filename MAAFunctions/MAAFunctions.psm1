@@ -217,11 +217,14 @@ Function Test-Port {
 	$RemoteServer = If ([string]::IsNullOrEmpty($ComputerName)) {$IPAddress} Else {$ComputerName};
     $test = New-Object System.Net.Sockets.TcpClient;
 	Try {
-		$Error.Clear()
 		$test.Connect($RemoteServer, $Port);
+		$true
 	}
 	Catch {
 		$false
+		$Error.Clear()
 	}
-	if (!$Error){$true}
+	Finally {
+		$test.Dispose();
+	}
 }
