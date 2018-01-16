@@ -122,6 +122,9 @@ Function Invoke-SQLCustomScript {
 
 	.PARAMETER SQLScript
 		Sql script to query
+	
+	.PARAMETER VerboseOutput
+		Allow output text message after tsql execution
 
 	.EXAMPLE
 		Invoke-SQLCustomScript -SQLInstance localhost -SQLDBName master -SQLScript "Select name,user_access_desc from sys.databases"
@@ -136,12 +139,14 @@ Function Invoke-SQLCustomScript {
 			[String[]] $SQLInstance,
 		[Parameter(Mandatory=$true,Position=1)]
 			[String[]] $SQLDBName,
-		[Parameter(Mandatory=$true,Position=3)]
+		[Parameter(Mandatory=$true,Position=2)]
 			[String[]] $SQLScript,
-		[Parameter(Mandatory=$false,Position=4)]
+		[Parameter(Mandatory=$false,Position=3)]
 			[String[]] $SQLLogin,
-		[Parameter(Mandatory=$false,Position=5)]
-			[String[]] $SQLPassword
+		[Parameter(Mandatory=$false,Position=4)]
+			[String[]] $SQLPassword,
+		[Parameter(Mandatory=$false)]
+			[switch] $VerboseOutput
 	)
 	$StartLocation = Get-Location
 	$SqlConnection = New-Object System.Data.SqlClient.SqlConnection
@@ -150,6 +155,11 @@ Function Invoke-SQLCustomScript {
 		$SqlConnection.ConnectionString += "true;"
 	} else {
 		$SqlConnection.ConnectionString += "false; user id = $($SQLLogin); password = $($SQLPassword);"
+	}
+	if ($VerboseOutput) {
+		$handler = [System.Data.SqlClient.SqlInfoMessageEventHandler] {param($sender, $event) Write-Host $event.Message }
+		$SqlConnection.add_InfoMessage($handler)
+		$SqlConnection.FireInfoMessageEventOnUserErrors = $true
 	}
 	$SqlCmd = New-Object System.Data.SqlClient.SqlCommand
 	$SqlCmd.CommandText = $SQLScript
