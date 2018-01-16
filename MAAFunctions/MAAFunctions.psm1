@@ -136,19 +136,19 @@ Function Invoke-SQLCustomScript {
 #>
 	Param (
 		[Parameter(Mandatory=$true,Position=0)]
-			[String[]] $SQLInstance,
+			[String] $SQLInstance,
 		[Parameter(Mandatory=$true,Position=1)]
-			[String[]] $SQLDBName,
+			[String] $SQLDBName,
 		[Parameter(Mandatory=$true,Position=2)]
-			[String[]] $SQLScript,
+			[String] $SQLScript,
 		[Parameter(Mandatory=$false,Position=3)]
-			[String[]] $SQLLogin,
+			[String] $SQLLogin,
 		[Parameter(Mandatory=$false,Position=4)]
-			[String[]] $SQLPassword,
+			[String] $SQLPassword,
 		[Parameter(Mandatory=$false)]
 			[switch] $VerboseOutput,
 		[Parameter(Mandatory=$false)]
-			[String[]] $OutputFile
+			[String] $OutputFile
 	)
 	$StartLocation = Get-Location
 	$SqlConnection = New-Object System.Data.SqlClient.SqlConnection
