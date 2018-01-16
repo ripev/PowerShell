@@ -166,8 +166,9 @@ Function Invoke-SQLCustomScript {
 				Remove-Item $OutputFile -Force
 			}
 			$handler = [System.Data.SqlClient.SqlInfoMessageEventHandler] {param($sender, $event) Write-Output $event.Message | Out-File $OutputFile -Encoding UTF8 -Append}
+		} else {
+			$handler = [System.Data.SqlClient.SqlInfoMessageEventHandler] {param($sender, $event) Write-Host $event.Message }
 		}
-		$handler = [System.Data.SqlClient.SqlInfoMessageEventHandler] {param($sender, $event) Write-Host $event.Message }
 		$SqlConnection.add_InfoMessage($handler)
 		$SqlConnection.FireInfoMessageEventOnUserErrors = $true
 	}
