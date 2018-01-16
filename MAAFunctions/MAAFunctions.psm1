@@ -146,7 +146,9 @@ Function Invoke-SQLCustomScript {
 		[Parameter(Mandatory=$false,Position=4)]
 			[String[]] $SQLPassword,
 		[Parameter(Mandatory=$false)]
-			[switch] $VerboseOutput
+			[switch] $VerboseOutput,
+		[Parameter(Mandatory=$false)]
+			[String[]] $OutputFile
 	)
 	$StartLocation = Get-Location
 	$SqlConnection = New-Object System.Data.SqlClient.SqlConnection
@@ -157,6 +159,14 @@ Function Invoke-SQLCustomScript {
 		$SqlConnection.ConnectionString += "false; user id = $($SQLLogin); password = $($SQLPassword);"
 	}
 	if ($VerboseOutput) {
+		if ($OutputFile) {
+			if ((Test-Path $OutputFile) -eq $false) {
+				New-Item $OutputFile -Type File | Out-Null
+			} else {
+				Remove-Item $OutputFile -Force
+			}
+			$handler = [System.Data.SqlClient.SqlInfoMessageEventHandler] {param($sender, $event) Write-Output $event.Message | Out-File $OutputFile -Encoding UTF8 -Append}
+		}
 		$handler = [System.Data.SqlClient.SqlInfoMessageEventHandler] {param($sender, $event) Write-Host $event.Message }
 		$SqlConnection.add_InfoMessage($handler)
 		$SqlConnection.FireInfoMessageEventOnUserErrors = $true
