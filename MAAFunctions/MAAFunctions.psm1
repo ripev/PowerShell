@@ -148,7 +148,9 @@ Function Invoke-SQLCustomScript {
 		[Parameter(Mandatory=$false)]
 			[switch] $VerboseOutput,
 		[Parameter(Mandatory=$false)]
-			[String] $OutputFile
+			[String] $OutputFile,
+		[Parameter(Mandatory=$false)]
+			[String] $Timeout = 60000
 	)
 	$StartLocation = Get-Location
 	$SqlConnection = New-Object System.Data.SqlClient.SqlConnection
@@ -175,6 +177,7 @@ Function Invoke-SQLCustomScript {
 	$SqlCmd = New-Object System.Data.SqlClient.SqlCommand
 	$SqlCmd.CommandText = $SQLScript
 	$SqlCmd.Connection = $SqlConnection
+	$SqlCmd.CommandTimeout = $Timeout
 	$SqlAdapter = New-Object System.Data.SqlClient.SqlDataAdapter
 	$SqlAdapter.SelectCommand = $SqlCmd
 	$DataSet = New-Object System.Data.DataSet
