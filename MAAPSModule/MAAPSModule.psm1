@@ -61,7 +61,7 @@ Function Get-MAAPSModuleInternetVersion {
 	$OutputItem | Add-Member NoteProperty "psdpath" $psd1temp
 	$OutputItem | Add-Member NoteProperty "psmpath" $psm1temp
 	$Output += $OutputItem
-    $Output
+ $Output
 }
 
 Function Get-MAAPSModuleLocalVersion {
@@ -102,7 +102,7 @@ Function Get-MAACommands {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
-    Get-Command | Where-Object {$_.ModuleName -eq "MAAPSModule"}
+ Get-Command | Where-Object {$_.ModuleName -eq "MAAPSModule"}
 }
 
 Function Update-MAAPSModule {
@@ -192,14 +192,14 @@ Function Get-DCCredential {
 
 Function Get-LocalDisk {
 <#
-    .SYNOPSIS
-        Show fixed disk information
+ .SYNOPSIS
+ Show fixed disk information
 
-    .DESCRIPTION
-        Show fixed disk information in table pane with AutoSize formatting
+ .DESCRIPTION
+ Show fixed disk information in table pane with AutoSize formatting
 
-    .LINK
-        https://github.com/ripev/PowerShell/
+ .LINK
+ https://github.com/ripev/PowerShell/
 #>
 	Param(
 		[Parameter(Mandatory=$false,Position=0)][string]$comp="localhost"
@@ -215,16 +215,16 @@ Function Get-LocalDisk {
 
 Function Get-RunningSQLInstances {
 <#
-    .SYNOPSIS
-        Show running SQL instances
+ .SYNOPSIS
+ Show running SQL instances
 
-    .DESCRIPTION
-        Show local running SQL instances
+ .DESCRIPTION
+ Show local running SQL instances
 
-    .LINK
-        https://github.com/ripev/PowerShell/
+ .LINK
+ https://github.com/ripev/PowerShell/
 #>
-    Get-Service | Where-Object {($_.DisplayName -like 'SQL Server (*') -and ($_.Status -like 'Running')}
+ Get-Service | Where-Object {($_.DisplayName -like 'SQL Server (*') -and ($_.Status -like 'Running')}
 }
 
 Function Get-SQLDbs {
@@ -251,22 +251,22 @@ Function Get-SQLDbs {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
-    Param (
+ Param (
 		[parameter(Mandatory=$true,ValueFromPipeline=$true)]
 			[String[]] $instance = "localhost",
 		[parameter(Mandatory=$false)]
 			[Switch] $all
 	)
 	$location = Get-Location
-    [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | Out-Null
-    $server = New-Object ('Microsoft.SqlServer.Management.Smo.Server') "$instance"
-    $DBs = $server.databases
-    $DBs = $DBs.Name
+ [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | Out-Null
+ $server = New-Object ('Microsoft.SqlServer.Management.Smo.Server') "$instance"
+ $DBs = $server.databases
+ $DBs = $DBs.Name
 	if (!$all) {
 		$DBs = $DBs | Where-Object {$_ -notmatch 'master' -and $_ -notmatch 'model' -and $_ -notmatch 'msdb' -and $_ -notmatch 'tempdb'} #все бд
 	}
-    $Output=@()
-    foreach ($db in $DBs) {
+ $Output=@()
+ foreach ($db in $DBs) {
 		
 		$query = "
 			with fs
@@ -282,13 +282,13 @@ Function Get-SQLDbs {
 			from sys.databases db where name = '$db'
 		"
 		$dbinfo = Invoke-Sqlcmd -ServerInstance "$instance" -Query $query
-        $OutputItem = New-Object Object
-        $OutputItem | Add-Member NoteProperty "Name" $db
+ $OutputItem = New-Object Object
+ $OutputItem | Add-Member NoteProperty "Name" $db
 		$OutputItem | Add-Member NoteProperty "DataFileSizeMB" $dbinfo.DataFileSizeMB
 		$OutputItem | Add-Member NoteProperty "LogFileSizeMB" $dbinfo.LogFileSizeMB
-        $Output += $OutputItem
-    }
-    $Output
+ $Output += $OutputItem
+ }
+ $Output
 	Set-Location $location
 }
 
@@ -349,19 +349,19 @@ Function Pause {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
-    param ($message = "Press any key...")
+ param ($message = "Press any key...")
 
-    # Check if running Powershell ISE
-    if ($psISE)
-    {
-        Add-Type -AssemblyName System.Windows.Forms
-        [System.Windows.Forms.MessageBox]::Show("$message")
-    }
-    else
-    {
-        Write-Host "$message" -ForegroundColor Yellow
-        $x = $host.ui.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    }
+ # Check if running Powershell ISE
+ if ($psISE)
+ {
+ Add-Type -AssemblyName System.Windows.Forms
+ [System.Windows.Forms.MessageBox]::Show("$message")
+ }
+ else
+ {
+ Write-Host "$message" -ForegroundColor Yellow
+ $x = $host.ui.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+ }
 }
 
 Function Get-NotStartedSVCs {
@@ -388,8 +388,8 @@ Function Get-NotStartedSVCs {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
-    param ($srv = "localhost")
-    Get-Service -ComputerName $srv | Where-Object {$_.starttype -match "Automatic" -and $_.status -ne "Running"}
+ param ($srv = "localhost")
+ Get-Service -ComputerName $srv | Where-Object {$_.starttype -match "Automatic" -and $_.status -ne "Running"}
 }
 
 Function Get-RandomName {
@@ -442,8 +442,8 @@ Function Invoke-ABTPSScript {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
-    Param ([Parameter(Mandatory=$true,Position=1)][String]$name)
-    $url = "https://avicom.ru/uploader/ps1/" + $name + ".ps1"
+ Param ([Parameter(Mandatory=$true,Position=1)][String]$name)
+ $url = "https://avicom.ru/uploader/ps1/" + $name + ".ps1"
 	Invoke-Expression ((new-object net.webclient).DownloadString("$url"))
 }
 
@@ -517,7 +517,7 @@ Function Connect-Remote {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
-    param (
+ param (
 		[Parameter(Mandatory=$true,Position=0)] [ValidateNotNullOrEmpty()] [string] $srv,
 		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential
 	)
@@ -570,7 +570,7 @@ Function Get-File {
 		Write-Host "'$location'" -f Cyan
 		Write-Host "Overwrite?" -f Red
 		Write-Host "[y] Yes or " -NoNewline
-		Write-Host "[N] No"  -f Yellow -NoNewline
+		Write-Host "[N] No" -f Yellow -NoNewline
 		Write-Host " (Default is [N]):" -NoNewline
 		$OverwriteReq = Read-Host
 		if ($OverwriteReq -eq "Y") {Remove-Item $file -Force}
@@ -608,7 +608,7 @@ Function Get-StoppedAppPools {
 		Get stopped IIS AppPools
 
 	.LINK
-        https://github.com/ripev/PowerShell/
+ https://github.com/ripev/PowerShell/
 #>
 	if ((Test-Admin) -eq $false) {
 		Output "Please run scrip with Admin rignts" -color Red
@@ -769,4 +769,104 @@ Function Get-CompInfo {
 	$OutputItem | Add-Member NoteProperty "TotalVisable_Memory_MB" -value $OSTotalVisibleMemory
 	$Output += $OutputItem
 	$Output
+}
+
+function New-IsoFile {
+<#
+	.Synopsis
+	Creates a new .iso file
+	.Description
+	The New-IsoFile cmdlet creates a new .iso file containing content from chosen folders
+	.Example
+	New-IsoFile "c:\tools","c:Downloads\utils"
+	This command creates a .iso file in $env:temp folder (default location) that contains c:\tools and c:\downloads\utils folders. The folders themselves are included at the root of the .iso image.
+	.Example
+	New-IsoFile -FromClipboard -Verbose
+	Before running this command, select and copy (Ctrl-C) files/folders in Explorer first.
+	.Example
+	dir c:\WinPE | New-IsoFile -Path c:\temp\WinPE.iso -BootFile "${env:ProgramFiles(x86)}\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\amd64\Oscdimg\efisys.bin" -Media DVDPLUSR -Title "WinPE"
+	This command creates a bootable .iso file containing the content from c:\WinPE folder, but the folder itself isn't included. Boot file etfsboot.com can be found in Windows ADK. Refer to IMAPI_MEDIA_PHYSICAL_TYPE enumeration for possible media types: http://msdn.microsoft.com/en-us/library/windows/desktop/aa366217(v=vs.85).aspx
+	.Link
+	https://gallery.technet.microsoft.com/scriptcenter/New-ISOFile-function-a8deeffd
+	.Notes
+	NAME: New-IsoFile
+	AUTHOR: Chris Wu
+	LASTEDIT: 03/23/2016 14:46:50
+#>
+	[CmdletBinding(DefaultParameterSetName='Source')]
+		Param(
+			[parameter(Position=1,Mandatory=$true,ValueFromPipeline=$true, ParameterSetName='Source')]$Source,
+			[parameter(Position=2)][string]$Path = "$env:temp\$((Get-Date).ToString('yyyyMMdd-HHmmss.ffff')).iso",
+			[ValidateScript({Test-Path -LiteralPath $_ -PathType Leaf})][string]$BootFile = $null,
+			[ValidateSet('CDR','CDRW','DVDRAM','DVDPLUSR','DVDPLUSRW','DVDPLUSR_DUALLAYER','DVDDASHR','DVDDASHRW','DVDDASHR_DUALLAYER','DISK','DVDPLUSRW_DUALLAYER','BDR','BDRE')][string] $Media = 'DVDPLUSRW_DUALLAYER',
+			[string]$Title = (Get-Date).ToString("yyyyMMdd-HHmmss.ffff"),
+			[switch]$Force,
+			[parameter(ParameterSetName='Clipboard')][switch]$FromClipboard
+	)
+
+	Begin {
+		($cp = new-object System.CodeDom.Compiler.CompilerParameters).CompilerOptions = '/unsafe'
+		if (!('ISOFile' -as [type])) {
+			Add-Type -CompilerParameters $cp -TypeDefinition @'
+public class ISOFile
+{
+	public unsafe static void Create(string Path, object Stream, int BlockSize, int TotalBlocks)
+	{
+		int bytes = 0;
+		byte[] buf = new byte[BlockSize];
+		var ptr = (System.IntPtr)(&bytes);
+		var o = System.IO.File.OpenWrite(Path);
+		var i = Stream as System.Runtime.InteropServices.ComTypes.IStream;
+		
+		if (o != null) {
+			while (TotalBlocks-- > 0) {
+				i.Read(buf, BlockSize, ptr); o.Write(buf, 0, bytes);
+			}
+			o.Flush(); o.Close();
+		}
+	}
+}
+'@
+		}
+
+		if ($BootFile) {
+			if('BDR','BDRE' -contains $Media) { Write-Warning "Bootable image doesn't seem to work with media type $Media" }
+			($Stream = New-Object -ComObject ADODB.Stream -Property @{Type=1}).Open() # adFileTypeBinary
+			$Stream.LoadFromFile((Get-Item -LiteralPath $BootFile).Fullname)
+			($Boot = New-Object -ComObject IMAPI2FS.BootOptions).AssignBootImage($Stream)
+		}
+
+		$MediaType = @('UNKNOWN','CDROM','CDR','CDRW','DVDROM','DVDRAM','DVDPLUSR','DVDPLUSRW','DVDPLUSR_DUALLAYER','DVDDASHR','DVDDASHRW','DVDDASHR_DUALLAYER','DISK','DVDPLUSRW_DUALLAYER','HDDVDROM','HDDVDR','HDDVDRAM','BDROM','BDR','BDRE')
+
+		Write-Verbose -Message "Selected media type is $Media with value $($MediaType.IndexOf($Media))"
+		($Image = New-Object -com IMAPI2FS.MsftFileSystemImage -Property @{VolumeName=$Title}).ChooseImageDefaultsForMediaType($MediaType.IndexOf($Media))
+	
+		if (!($Target = New-Item -Path $Path -ItemType File -Force:$Force -ErrorAction SilentlyContinue)) { Write-Error -Message "Cannot create file $Path. Use -Force parameter to overwrite if the target file already exists."; break }
+	}
+
+	Process {
+		if($FromClipboard) {
+			if($PSVersionTable.PSVersion.Major -lt 5) { Write-Error -Message 'The -FromClipboard parameter is only supported on PowerShell v5 or higher'; break }
+			$Source = Get-Clipboard -Format FileDropList
+		}
+
+		foreach($item in $Source) {
+			if($item -isnot [System.IO.FileInfo] -and $item -isnot [System.IO.DirectoryInfo]) {
+				$item = Get-Item -LiteralPath $item
+			}
+
+			if($item) {
+				Write-Verbose -Message "Adding item to the target image: $($item.FullName)"
+				try { $Image.Root.AddTree($item.FullName, $true) } catch { Write-Error -Message ($_.Exception.Message.Trim() + ' Try a different media type.') }
+			}
+		}
+	}
+
+	End {
+		if ($Boot) { $Image.BootImageOptions=$Boot }
+		$Result = $Image.CreateResultImage()
+		[ISOFile]::Create($Target.FullName,$Result.ImageStream,$Result.BlockSize,$Result.TotalBlocks)
+		Write-Verbose -Message "Target image ($($Target.FullName)) has been created"
+		$Target
+	}
 }
