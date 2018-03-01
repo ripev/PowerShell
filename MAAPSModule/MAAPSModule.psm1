@@ -61,7 +61,7 @@ Function Get-MAAPSModuleInternetVersion {
 	$OutputItem | Add-Member NoteProperty "psdpath" $psd1temp
 	$OutputItem | Add-Member NoteProperty "psmpath" $psm1temp
 	$Output += $OutputItem
- $Output
+	$Output
 }
 
 Function Get-MAAPSModuleLocalVersion {
@@ -102,7 +102,7 @@ Function Get-MAACommands {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
- Get-Command | Where-Object {$_.ModuleName -eq "MAAPSModule"}
+	Get-Command | Where-Object {$_.ModuleName -eq "MAAPSModule"}
 }
 
 Function Update-MAAPSModule {
@@ -192,14 +192,14 @@ Function Get-DCCredential {
 
 Function Get-LocalDisk {
 <#
- .SYNOPSIS
- Show fixed disk information
+	.SYNOPSIS
+	Show fixed disk information
 
- .DESCRIPTION
- Show fixed disk information in table pane with AutoSize formatting
+	.DESCRIPTION
+	Show fixed disk information in table pane with AutoSize formatting
 
- .LINK
- https://github.com/ripev/PowerShell/
+	.LINK
+	https://github.com/ripev/PowerShell/
 #>
 	Param(
 		[Parameter(Mandatory=$false,Position=0)][string]$comp="localhost"
@@ -215,16 +215,16 @@ Function Get-LocalDisk {
 
 Function Get-RunningSQLInstances {
 <#
- .SYNOPSIS
- Show running SQL instances
+	.SYNOPSIS
+	Show running SQL instances
 
- .DESCRIPTION
- Show local running SQL instances
+	.DESCRIPTION
+	Show local running SQL instances
 
- .LINK
- https://github.com/ripev/PowerShell/
+	.LINK
+	https://github.com/ripev/PowerShell/
 #>
- Get-Service | Where-Object {($_.DisplayName -like 'SQL Server (*') -and ($_.Status -like 'Running')}
+	Get-Service | Where-Object {($_.DisplayName -like 'SQL Server (*') -and ($_.Status -like 'Running')}
 }
 
 Function Get-SQLDbs {
@@ -251,22 +251,22 @@ Function Get-SQLDbs {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
- Param (
+	Param (
 		[parameter(Mandatory=$true,ValueFromPipeline=$true)]
 			[String[]] $instance = "localhost",
 		[parameter(Mandatory=$false)]
 			[Switch] $all
 	)
 	$location = Get-Location
- [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | Out-Null
- $server = New-Object ('Microsoft.SqlServer.Management.Smo.Server') "$instance"
- $DBs = $server.databases
- $DBs = $DBs.Name
+	[System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | Out-Null
+	$server = New-Object ('Microsoft.SqlServer.Management.Smo.Server') "$instance"
+	$DBs = $server.databases
+	$DBs = $DBs.Name
 	if (!$all) {
 		$DBs = $DBs | Where-Object {$_ -notmatch 'master' -and $_ -notmatch 'model' -and $_ -notmatch 'msdb' -and $_ -notmatch 'tempdb'} #все бд
 	}
- $Output=@()
- foreach ($db in $DBs) {
+	$Output=@()
+	foreach ($db in $DBs) {
 		
 		$query = "
 			with fs
@@ -282,13 +282,13 @@ Function Get-SQLDbs {
 			from sys.databases db where name = '$db'
 		"
 		$dbinfo = Invoke-Sqlcmd -ServerInstance "$instance" -Query $query
- $OutputItem = New-Object Object
- $OutputItem | Add-Member NoteProperty "Name" $db
+		$OutputItem = New-Object Object
+		$OutputItem | Add-Member NoteProperty "Name" $db
 		$OutputItem | Add-Member NoteProperty "DataFileSizeMB" $dbinfo.DataFileSizeMB
 		$OutputItem | Add-Member NoteProperty "LogFileSizeMB" $dbinfo.LogFileSizeMB
- $Output += $OutputItem
- }
- $Output
+		$Output += $OutputItem
+	}
+	$Output
 	Set-Location $location
 }
 
@@ -349,19 +349,19 @@ Function Pause {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
- param ($message = "Press any key...")
+	param ($message = "Press any key...")
 
- # Check if running Powershell ISE
- if ($psISE)
- {
- Add-Type -AssemblyName System.Windows.Forms
- [System.Windows.Forms.MessageBox]::Show("$message")
- }
- else
- {
- Write-Host "$message" -ForegroundColor Yellow
- $x = $host.ui.RawUI.ReadKey("NoEcho,IncludeKeyDown")
- }
+	# Check if running Powershell ISE
+	if ($psISE)
+	{
+		Add-Type -AssemblyName System.Windows.Forms
+		[System.Windows.Forms.MessageBox]::Show("$message")
+	}
+	else
+	{
+		Write-Host "$message" -ForegroundColor Yellow
+		$x = $host.ui.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+	}
 }
 
 Function Get-NotStartedSVCs {
@@ -388,8 +388,8 @@ Function Get-NotStartedSVCs {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
- param ($srv = "localhost")
- Get-Service -ComputerName $srv | Where-Object {$_.starttype -match "Automatic" -and $_.status -ne "Running"}
+	param ($srv = "localhost")
+	Get-Service -ComputerName $srv | Where-Object {$_.starttype -match "Automatic" -and $_.status -ne "Running"}
 }
 
 Function Get-RandomName {
@@ -517,7 +517,7 @@ Function Connect-Remote {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
- param (
+	param (
 		[Parameter(Mandatory=$true,Position=0)] [ValidateNotNullOrEmpty()] [string] $srv,
 		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential
 	)
@@ -608,7 +608,7 @@ Function Get-StoppedAppPools {
 		Get stopped IIS AppPools
 
 	.LINK
- https://github.com/ripev/PowerShell/
+	https://github.com/ripev/PowerShell/
 #>
 	if ((Test-Admin) -eq $false) {
 		Output "Please run scrip with Admin rignts" -color Red
