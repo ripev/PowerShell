@@ -252,3 +252,33 @@ Function Test-Port {
 		$test.Dispose();
 	}
 }
+
+Function fileSizeOutput {
+<#
+	.SYNOPSIS
+		Convert input integer to pretty GB/MB/KB format
+	.DESCRIPTION
+		Returns (convert) size in format #.### GB/MB/KB
+	.PARAMETER Size
+		Input integer parameter without chars
+	.EXAMPLE
+		fileSizeOutput 10250
+		Returns 10,01 KB
+	.LINK
+		https://makovetsky.me
+	.NOTES
+		NAME fileSizeOutput
+		AUTHOR: Andrey Makovetsky (andrey@makovetsky.me)
+		LASTEDIT: 2018-03-29
+#>
+	param ([Parameter (Mandatory=$true,Position=0)]$Size)
+	if ($Size -ge 1073741824) { # check that size in GB
+		($($Size)/1073741824).ToString("#.###") + " GB"
+	} else {
+		if ($Size -ge 1048576) { # check that size in MB
+			($($Size)/1048576).ToString("#.###") + " MB"
+		} else { # check that size in KB
+			($($Size)/1024).ToString("#.###") + " KB"
+		}
+	}
+}
