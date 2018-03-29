@@ -12,3 +12,5 @@ Trere are some PowerShell functions for system use
 #### `New-CustomGuid`
 6. Testing port
 #### `Test-Port`
+7. Convert bytest to GB/MB/KB
+#### fileSizeOutput
