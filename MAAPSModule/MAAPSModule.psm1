@@ -870,3 +870,15 @@ public class ISOFile
 		$Target
 	}
 }
+
+function Get-Uptime {
+	Get-CimInstance -ClassName win32_operatingsystem | `
+	Select-Object @{n="ComputerName";e={$_.CSName}},LastBootUpTime,`
+	@{n="Uptime";e={
+			$Uptime=$_.LocalDateTime-$_.LastBootUpTime;`
+			if ($Uptime.Days -gt 0) {$OutputString="$($Uptime.Days) days, "};`
+			$OutputString+="$($Uptime.Hours) hours, $($Uptime.Minutes) minutes";`
+			$OutputString
+		}
+	}
+}
