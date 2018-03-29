@@ -166,7 +166,7 @@ Function Update-MAAFunctions {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
-	iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/ripev/PowerShell/master/MAAFunctions/MAAFunctionsInstall.ps1'))
+	Invoke-Expression ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/ripev/PowerShell/master/MAAFunctions/MAAFunctionsInstall.ps1'))
 }
 
 Function Get-DCCredential {
@@ -205,7 +205,7 @@ Function Get-LocalDisk {
 		[Parameter(Mandatory=$false,Position=0)][string]$comp="localhost"
 	)
 	Get-WmiObject Win32_Volume -ComputerName $comp | `
-	where {$_.DriveType -eq 3 -and $_.DriveLetter} | `
+	Where-Object {$_.DriveType -eq 3 -and $_.DriveLetter} | `
 	Select-Object `
 		DriveLetter,Label,FileSystem,`
 	@{l="FreeSpace";e={"$([math]::Round(($_.FreeSpace / 1GB), 2)) GB"}},`
@@ -360,7 +360,7 @@ Function Pause {
 	else
 	{
 		Write-Host "$message" -ForegroundColor Yellow
-		$x = $host.ui.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+		$host.ui.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 	}
 }
 
@@ -743,7 +743,7 @@ Function Get-CompInfo {
 	$OSInfo = Get-WmiObject Win32_OperatingSystem -ComputerName $Name
 	$OSTotalVirtualMemory = [math]::round($OSInfo.TotalVirtualMemorySize / 1MB, 2)
 	$OSTotalVisibleMemory = [math]::round(($OSInfo.TotalVisibleMemorySize / 1MB), 2)
-	$PhysicalMemory = Get-WmiObject CIM_PhysicalMemory -ComputerName $Name | Measure-Object -Property capacity -Sum | % { [Math]::Round(($_.sum / 1GB), 2) }
+	$PhysicalMemory = Get-WmiObject CIM_PhysicalMemory -ComputerName $Name | Measure-Object -Property capacity -Sum | ForEach-Object { [Math]::Round(($_.sum / 1GB), 2) }
 	[int]$CPUCount = "1"
 	if ($CPUInfo.Count -ge "2") {
 		$CPUCount = $CPUInfo.Count
