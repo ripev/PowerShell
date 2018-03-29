@@ -265,7 +265,7 @@ Function fileSizeOutput {
 		fileSizeOutput 10250
 		Returns 10,01 KB
 	.LINK
-		https://makovetsky.me
+		https://github.com/ripev/PowerShell/tree/master/MAAFunctions#filesizeoutput
 	.NOTES
 		NAME fileSizeOutput
 		AUTHOR: Andrey Makovetsky (andrey@makovetsky.me)
