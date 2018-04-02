@@ -260,6 +260,10 @@ Function Get-SQLDbs {
 	$location = Get-Location
 	[System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | Out-Null
 	$server = New-Object ('Microsoft.SqlServer.Management.Smo.Server') "$instance"
+	if ($server.status -ne "Online") {
+		Write-Host "Cannot connect to '$($instance)'" -ForegroundColor Red
+		Break
+	}
 	$DBs = $server.databases
 	$DBs = $DBs.Name
 	if (!$all) {
