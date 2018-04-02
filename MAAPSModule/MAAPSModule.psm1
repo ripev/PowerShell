@@ -281,7 +281,21 @@ Function Get-SQLDbs {
 				(select sum(size) from fs where type = 1 and fs.database_id = db.database_id) LogFileSizeMB
 			from sys.databases db where name = '$db'
 		"
-		$dbinfo = Invoke-Sqlcmd -ServerInstance "$instance" -Query $query
+		Try {
+			if ((Get-Command Invoke-Sqlcmd -ErrorAction SilentlyContinue).count -gt 0) {
+				$dbinfo = Invoke-Sqlcmd -ServerInstance "$instance" -Query $query -ErrorAction Stop
+			} else {
+				if ((Get-Command Invoke-SQLCustomScript -ErrorAction SilentlyContinue).count -eq 1) {
+					$dbinfo = Invoke-SQLCustomScript -SQLInstance "$instance" -SQLDBName "master" -SQLScript $query -ErrorAction Stop
+				} else {
+					Write-Host "No SQL commands find. Try to install Management Studio or MAAFunctions." -ForegroundColor DarkRed
+					Break
+				}
+			}
+		} Catch {
+			Write-Host "Error with executing SQL script. Error details:`n$($Error[0])" -ForegroundColor Red
+			Break
+		}
 		$OutputItem = New-Object Object
 		$OutputItem | Add-Member NoteProperty "Name" $db
 		$OutputItem | Add-Member NoteProperty "DataFileSizeMB" $dbinfo.DataFileSizeMB
