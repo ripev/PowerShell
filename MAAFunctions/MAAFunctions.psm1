@@ -282,3 +282,50 @@ Function fileSizeOutput {
 		}
 	}
 }
+
+Function Set-PSWindowTitle {
+<#
+	.SYNOPSIS
+		Set powershell window title
+	.PARAMETER title
+		Title string to display
+	.EXAMPLE
+		Set-PSWindowTitle -Title "Test PS"
+		Set PS title to 'Test PS'
+	.LINK
+		https://github.com/ripev/PowerShell/tree/master/MAAFunctions#set-pswindowtitle
+	.NOTES
+		NAME Set-PSWindowTitle
+		AUTHOR: Andrey Makovetsky (andrey@makovetsky.me)
+		LASTEDIT: 2018-05-31
+#>
+	param (
+		[Parameter (Mandatory=$true,Position=0)]
+			[String] $Title = "Windows PowerShell"
+	)
+	# Checks that script not running in PowerShell ISE
+	if (!$psISE) {
+		$host.ui.RawUI.WindowTitle = $Title
+	}
+}
+
+Function Get-PSWindowTitle {
+<#
+	.SYNOPSIS
+		Get powershell window title
+	.DESCRIPTION
+		Returns string from current running powershell window
+	.LINK
+		https://github.com/ripev/PowerShell/tree/master/MAAFunctions#get-pswindowtitle
+	.NOTES
+		NAME Get-PSWindowTitle
+		AUTHOR: Andrey Makovetsky (andrey@makovetsky.me)
+		LASTEDIT: 2018-05-31
+#>
+	# Checks that script not running in PowerShell ISE
+	if (!$psISE) {
+		$host.ui.RawUI.WindowTitle
+	} else {
+		$null
+	}
+}

@@ -14,3 +14,7 @@ Trere are some PowerShell functions for system use
 #### `Test-Port`
 7. Convert bytest to GB/MB/KB
 #### `fileSizeOutput`
+8. Set PowerShell window title
+#### `Set-PSWindowTitle`
+9. Get PowerShell window title
+#### `Get-PSWindowTitle`
