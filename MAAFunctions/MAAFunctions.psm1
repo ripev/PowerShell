@@ -346,11 +346,13 @@ Function timeDurationOutput {
 		No new line after output
 	.EXAMPLE
 		timeDurationOutput [timespan]$duration
-		Outputs duration it '1 h 13 m 34 s'
+		Outputs duration in '1 h 13 m 34 s' format
 	.LINK
 		https://github.com/ripev/PowerShell/tree/master/MAAFunctions#timeDurationOutput
-	.INPUT
+	.INPUTS
 		[System.TimeSpan]
+	.OUTPUTS
+		[System.String]
 	.NOTES
 		NAME timeDurationOutput
 		AUTHOR: Andrey Makovetsky (andrey@makovetsky.me)
