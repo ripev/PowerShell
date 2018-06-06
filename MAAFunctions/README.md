@@ -18,3 +18,5 @@ Trere are some PowerShell functions for system use
 #### `Set-PSWindowTitle`
 9. Get PowerShell window title
 #### `Get-PSWindowTitle`
+10. Output duration in readable format
+#### `timeDurationOutput`

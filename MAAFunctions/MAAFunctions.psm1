@@ -329,3 +329,85 @@ Function Get-PSWindowTitle {
 		$null
 	}
 }
+
+Function timeDurationOutput {
+	<#
+	.SYNOPSIS
+		Show time duration in readable format
+	.DESCRIPTION
+		Returns (convert) size in format #.### GB/MB/KB
+	.PARAMETER duration
+		Input timespan to output
+	.PARAMETER nColor
+		Specify color for digits
+	.PARAMETER sColor
+		Specify color for strings
+	.PARAMETER NoNewLine
+		No new line after output
+	.EXAMPLE
+		timeDurationOutput [timespan]$duration
+		Outputs duration it '1 h 13 m 34 s'
+	.LINK
+		https://github.com/ripev/PowerShell/tree/master/MAAFunctions#timeDurationOutput
+	.INPUT
+		[System.TimeSpan]
+	.NOTES
+		NAME timeDurationOutput
+		AUTHOR: Andrey Makovetsky (andrey@makovetsky.me)
+		LASTEDIT: 2018-06-06
+#>
+	param (
+		[Parameter (Mandatory=$true,Position=0)]
+			[TimeSpan] $duration,
+		[Parameter (Mandatory=$false)]
+			[ValidateSet("Black","DarkBlue","DarkGreen","DarkCyan","DarkRed","DarkMagenta","DarkYellow","Gray","DarkGray","Blue","Green","Cyan","Red","Magenta","Yellow","White")]
+			[String] $nColor = "Yellow",
+		[Parameter (Mandatory=$false)]
+			[ValidateSet("Black","DarkBlue","DarkGreen","DarkCyan","DarkRed","DarkMagenta","DarkYellow","Gray","DarkGray","Blue","Green","Cyan","Red","Magenta","Yellow","White")]
+			[String] $sColor = "Gray",
+		[Parameter (Mandatory=$false)]
+			[Switch] $NoNewLine
+	)
+	function NScolorOut {
+		param (
+			[Parameter (Mandatory=$true,Position=0)]
+				[int] $n,
+			[Parameter (Mandatory=$true,Position=1)]
+				[string] $s,
+			[Parameter (Mandatory=$false)]
+				[Switch] $NoNewLine
+		)
+		Write-Host $n -ForegroundColor $nColor -NoNewline
+		Write-Host $s -ForegroundColor $sColor -NoNewline
+		if (!$NoNewLine) {Write-Host ""}
+	}
+	$hoursWithoutDays = [math]::Round($duration.TotalHours % 24)
+	$minutesWithoutHours = [math]::Round($duration.TotalMinutes % 60)
+	$secondsWithoutMinutes = [math]::Round($duration.TotalSeconds % 60)
+	# Days output
+	if ($duration.TotalDays -gt 0) {
+		NScolorOut $duration.TotalDays " d" -NoNewLine
+		if ($hoursWithoutDays -gt 0 -or $minutesWithoutHours -gt 0 -or $secondsWithoutMinutes -gt 0) {
+			Write-Host " " -NoNewline
+		}
+	}
+	# Hours output
+	if ($duration.TotalHours -gt 0 -and $hoursWithoutDays -gt 0) {
+		NScolorOut $($duration.TotalHours % 24) " h" -NoNewLine
+		if ($minutesWithoutHours -gt 0 -or $secondsWithoutMinutes -gt 0) {
+			Write-Host " " -NoNewline
+		}
+	}
+	# Minutes output
+	if ($duration.TotalMinutes -gt 0 -and $minutesWithoutHours -gt 0) {
+		NScolorOut $minutesWithoutHours " m" -NoNewLine
+		if ($secondsWithoutMinutes -gt 0) {
+			Write-Host " " -NoNewline
+		}
+	}
+	# Seconds output
+	if ($duration.TotalSeconds -gt 0 -and $secondsWithoutMinutes -gt 0) {
+		NScolorOut $secondsWithoutMinutes " s" -NoNewLine
+	}
+	if (!$NoNewLine) {Write-Host ""}
+}
