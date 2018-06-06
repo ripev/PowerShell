@@ -387,7 +387,7 @@ Function timeDurationOutput {
 	$minutesWithoutHours = [math]::Round($duration.TotalMinutes % 60)
 	$secondsWithoutMinutes = [math]::Round($duration.TotalSeconds % 60)
 	# Days output
-	if ($duration.TotalDays -gt 0) {
+	if ([math]::Round($duration.TotalDays) -gt 0) {
 		NScolorOut $duration.TotalDays " d" -NoNewLine
 		if ($hoursWithoutDays -gt 0 -or $minutesWithoutHours -gt 0 -or $secondsWithoutMinutes -gt 0) {
 			Write-Host " " -NoNewline
