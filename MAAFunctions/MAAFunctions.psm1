@@ -413,3 +413,36 @@ Function timeDurationOutput {
 	}
 	if (!$NoNewLine) {Write-Host ""}
 }
+
+function Get-LockedFileProcess {
+<#
+	.Synopsis
+		Get process thats lock the file
+	.Description
+		Search (Get-Process).Modules to file needed
+	.Example
+		Get-LockedFileProcess linq2db.pdb
+		Show process name with pid that uses this file
+	.Link
+		https://beamusupscotty.wordpress.com/2012/11/14/use-powershell-to-find-out-which-process-locks-a-file/
+	.Inputs
+		System.String[]
+	.Outputs
+		System.String[]
+	.Notes
+	NAME: Get-LockedFileProcess
+	AUTHOR: Alex Flipovici
+#>
+	param (
+		[Parameter (Mandatory=$true,Position=0)]
+			[string] $lockedFile
+	)
+	Get-Process | foreach {
+		$processVar = $_
+		$_.Modules | foreach {
+			if ($_.FileName -match $lockedFile) {
+				Write-Host $($processVar.Name) -NoNewline
+				Write-Host " PID: " -ForegroundColor Gray -NoNewline
+				Write-Host $($processVar.id) -ForegroundColor Yellow
+			}}}
+}

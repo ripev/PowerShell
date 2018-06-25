@@ -20,3 +20,5 @@ Trere are some PowerShell functions for system use
 #### `Get-PSWindowTitle`
 10. Output duration in readable format
 #### `timeDurationOutput`
+11. Get process that locks file
+#### `Get-LockedFileProcess`
