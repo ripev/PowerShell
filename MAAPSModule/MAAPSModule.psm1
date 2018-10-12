@@ -51,7 +51,7 @@ Function Get-MAAPSModuleInternetVersion {
 	$MAAPSModulePSD1urlDownloaded = (new-object net.webclient).DownloadString($MAAPSModulePSD1url)
 	$MAAPSModulePSM1urlDownloaded = (new-object net.webclient).DownloadString($MAAPSModulePSM1url)
 	$RandomNameString = Get-RandomName
-	$MAAPSModulePSD1urlDownloaded.Replace(".\MAAPSModule.psm1",".\$($RandomNameString).psm1")
+	$MAAPSModulePSD1urlDownloaded = $MAAPSModulePSD1urlDownloaded.Replace(".\MAAPSModule.psm1",".\$($RandomNameString).psm1")
 	$psd1temp = $env:TEMP + "\" + $RandomNameString + ".psd1"
 	$psm1temp = $env:TEMP + "\" + $RandomNameString + ".psm1"
 	Write-Output $MAAPSModulePSD1urlDownloaded | Out-File $psd1temp -Encoding unicode
@@ -90,6 +90,9 @@ Function Get-MAAPSModuleVerions {
 	$LocalVersion = Get-MAAPSModuleLocalVersion
 	Write-Host "Local version of modules is:`t" -ForegroundColor Yellow -NoNewline
 	Write-Host "$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build).$($LocalVersion.Revision)" -ForegroundColor Green
+	if ($LocalVersion -ne $InternetVersion) {
+		Write-Output "`nLocal and Internet versions is mismatch. You should update local version"
+	}
 }
 
 Function Get-MAACommands {
