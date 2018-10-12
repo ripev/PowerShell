@@ -724,7 +724,7 @@ Function Test-SSL {
 					if ($MailSendOption) {
 						Send-MailMessage -To $MailTo -Subject $MailSubject -From $MailFrom -SmtpServer $SmtpServer -Priority High -BodyAsHtml $MailBody -ErrorAction Stop
 					}
-				}    	
+				}
 				catch {
 					Write-Host "Cannot send email with message:" -ForegroundColor DarkGray
 					Write-Host "$($_.Exception.Message)" -ForegroundColor Red
