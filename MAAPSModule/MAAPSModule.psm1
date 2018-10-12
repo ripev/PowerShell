@@ -1,5 +1,5 @@
-﻿$MAAPSModuleURLManifest = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
-$MAAPSModuleURL = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psm1"
+﻿$MAAPSModulePSD1url = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
+$MAAPSModulePSM1url = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psm1"
 
 Function Output {
 <#
@@ -48,13 +48,14 @@ Function Get-MAAPSModuleInternetVersion {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
-	$MAAPSModuleURLManifestDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURLManifest)
-	$MAAPSModuleURLDownloaded = (new-object net.webclient).DownloadString($MAAPSModuleURL)
+	$MAAPSModulePSD1urlDownloaded = (new-object net.webclient).DownloadString($MAAPSModulePSD1url)
+	$MAAPSModulePSM1urlDownloaded = (new-object net.webclient).DownloadString($MAAPSModulePSM1url)
 	$RandomNameString = Get-RandomName
+	$MAAPSModulePSD1urlDownloaded.Replace(".\MAAPSModule.psm1",".\$($RandomNameString).psm1")
 	$psd1temp = $env:TEMP + "\" + $RandomNameString + ".psd1"
 	$psm1temp = $env:TEMP + "\" + $RandomNameString + ".psm1"
-	Write-Output $MAAPSModuleURLManifestDownloaded | Out-File $psd1temp -Encoding unicode
-	Write-Output $MAAPSModuleURLDownloaded | Out-File $psm1temp -Encoding utf8
+	Write-Output $MAAPSModulePSD1urlDownloaded | Out-File $psd1temp -Encoding unicode
+	Write-Output $MAAPSModulePSM1urlDownloaded | Out-File $psm1temp -Encoding utf8
 	$Output=@()
 	$OutputItem = New-Object Object
 	$OutputItem | Add-Member NoteProperty "Version"	(Test-ModuleManifest $psd1temp).Version
