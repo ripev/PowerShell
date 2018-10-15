@@ -623,11 +623,18 @@ function Get-NetVersions {
 		461814 = [version]'4.7.2'
 	}
 
-	Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -Recurse |
-		Get-ItemProperty -name Version, Release -EA 0 |
-		# For One True framework (latest .NET 4x), change match to PSChildName -eq "Full":
-			Where-Object { $_.PSChildName -match '^(?!S)\p{L}'} |
-				Select-Object @{name = ".NET Framework"; expression = {$_.PSChildName}}, 
-				@{name = "Product"; expression = {$Lookup[$_.Release]}}, 
-				Version, Release
+	$regPath = 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP'
+	
+	if (Test-Path $regPath -ErrorAction SilentlyContinue) {
+		Get-ChildItem $regPath -Recurse |
+			Get-ItemProperty -name Version, Release -EA 0 |
+			# For One True framework (latest .NET 4x), change match to PSChildName -eq "Full":
+				Where-Object { $_.PSChildName -match '^(?!S)\p{L}'} |
+					Select-Object @{name = ".NET Framework"; expression = {$_.PSChildName}}, 
+					@{name = "Product"; expression = {$Lookup[$_.Release]}}, 
+					Version, Release
+	} else {
+		Write-Output "Reg path of .NET not found. .NET framework not installed or not considtent os version"
+	}
+
 }
