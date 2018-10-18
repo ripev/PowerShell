@@ -446,46 +446,36 @@ Function Invoke-ABTPSScript {
 	Invoke-Expression ((new-object net.webclient).DownloadString("$url"))
 }
 
-Function Invoke-DCsCommand {
+Function Invoke-ComDepCommand {
 <#
 	.SYNOPSIS
-		Invoke command on DC computers
+		Invoke command on ComDep servers
 
 	.DESCRIPTION
-		Can be used with predefined credentials
+		Invoke command on ComDep servers
 
 	.EXAMPLE
-		Invoke-DCsCommand -Command "Get-LocalDisk"
+		Invoke-ComDepCommand -Command "Get-LocalDisk"
 
-		Authorize and run command Get-LocalDisk on dc0[1-5]
+		Authorize and run command Get-LocalDisk on ComDep servers
 
-	.EXAMPLE
-		$cred = Get-Credential "User.Name"
-		Invoke-DCsCommand -Credential $cred -Command "Get-LocalDisk"
+	.NOTES
+		Alias: icc
 
-		Authorize and run command Get-LocalDisk on dc0[1-5]
-	
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
 	Param(
-		[Parameter(Mandatory=$true,Position=0)] [String] $Command,
-		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential,
-		[switch] $All
+		[Parameter(Mandatory=$true,Position=0)] [String] $Command
 	)
-	if ($Credential -eq $null) {$Credential = Get-StoredCredential}
-	if ($All) {
-		$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc04.projectmate.ru","dc05.projectmate.ru","dc06.projectmate.ru"
-	} else {
-		$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc05.projectmate.ru","dc06.projectmate.ru"
-	}
+	$srvs = "spb-st-dev01","spb-pw-com1","spb-s-comdep","spb-s-kob1"
 	$Script = [Scriptblock]::Create($Command)
 	foreach ($srv in $srvs) {
 		"`n Executing command`t" | Write-Host -NoNewline -ForegroundColor Gray
 		"'$Command'" | Write-Host -ForegroundColor Yellow
 		" on " | Write-Host -ForegroundColor Gray -NoNewline
 		"$srv`n" | Write-Host -ForegroundColor DarkCyan
-		Invoke-Command -ComputerName $srv -Credential $Credential -UseSSL -ScriptBlock $Script
+		Invoke-Command -ComputerName $srv -ScriptBlock $Script
 	}
 }
 
