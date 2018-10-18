@@ -384,7 +384,11 @@ Function Get-NotStartedSVCs {
 	$GetServicesCmd = {
 		Get-Service | Where-Object {$_.starttype -match "Automatic" -and $_.status -ne "Running"}
 	}
-	Invoke-Command -ScriptBlock $GetServicesCmd -ComputerName $srv
+	if ($srv -eq "localhost") {
+		Invoke-Command -ScriptBlock $GetServicesCmd
+	} else {
+		Invoke-Command -ScriptBlock $GetServicesCmd -ComputerName $srv
+	}
 }
 
 Function Get-RandomName {
