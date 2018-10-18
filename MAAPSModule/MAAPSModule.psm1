@@ -582,11 +582,13 @@ Function Set-MAAAliases {
 #>
 	$AliasPath = (Get-Variable profile).Value
 	$PresentAliases = Get-Content $AliasPath
-	[array]$Aliases = 'Set-Alias "cr" Connect-Remote'
-	$Aliases += 'Set-Alias "maav" Get-MAAPSModuleVerions'
+	[array]$Aliases = 'Set-Alias -name cr Connect-Remote'
+	$Aliases += 'Set-Alias -name maav Get-MAAPSModuleVerions'
+	$Aliases += 'Set-Alias -name icc Invoke-ComDepCommand'
 	foreach ($Alias in $Aliases) {
 		if ($PresentAliases -notcontains $Alias) {
-			Write-Output $Alias | Out-File $AliasPath -Append
+			#Write-Output $Alias | Out-File $AliasPath -Append
+			$Alias | Add-Content $AliasPath
 		}
 	}
 }
