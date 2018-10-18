@@ -136,7 +136,7 @@ Function Update-MAAFunctions {
 	Invoke-Expression ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/ripev/PowerShell/master/MAAFunctions/MAAFunctionsInstall.ps1'))
 }
 
-Function Get-DCCredential {
+Function Get-StoredCredential {
 <#
 	.SYNOPSIS
 		Subfunction used in connect functions (Connect-Remote, etc.)
@@ -145,16 +145,23 @@ Function Get-DCCredential {
 		https://github.com/ripev/PowerShell/
 #>
 	$CredFilePath = "$($env:USERPROFILE)\.ssh\$($env:USERNAME).cred"
-	$CredFile = Get-Item $CredFilePath
-	try {
-		$PwdSecureString = Get-Content "$CredFile" | ConvertTo-SecureString -ErrorAction Stop
-	} catch {
-		Output -str "File with credentials not found at '$CredFile'" -color Red
+	if ((Test-Path $CredFilePath -ErrorAction SilentlyContinue) -eq $false) {
+		Output -str "File with credentials not found at '$($env:USERPROFILE)\.ssh'" -color Red
 		Output -str "You can create credential file with folowing command:" -color Gray
 		Output -str '$Credential = Get-Credential' -color Yellow
-		Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File $($env:USERPROFILE)\.ssh\$($env:USERNAME).cred'
+		Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File -PSPath "$($env:USERPROFILE)\.ssh\$($env:USERNAME).cred"'
+	} else {
+		$CredFile = Get-Item $CredFilePath
+		try {
+			$PwdSecureString = Get-Content $CredFile | ConvertTo-SecureString -ErrorAction Stop
+			New-Object System.Management.Automation.PSCredential -ArgumentList $($CredFile.BaseName), $PwdSecureString
+		} catch {
+			Output "Probably file created in other user session." -color Gray
+			Output "Recreate file with following command:" -color Gray
+			Output -str '$Credential = Get-Credential' -color Yellow
+			Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File $($env:USERPROFILE)\.ssh\$($env:USERNAME).cred'
+		}
 	}
-	New-Object System.Management.Automation.PSCredential -ArgumentList $($CredFile.BaseName), $PwdSecureString
 }
 
 Function Get-LocalDisk {
@@ -459,7 +466,7 @@ Function Invoke-DCsCommand {
 		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential,
 		[switch] $All
 	)
-	if ($Credential -eq $null) {$Credential = Get-DCCredential}
+	if ($Credential -eq $null) {$Credential = Get-StoredCredential}
 	if ($All) {
 		$srvs = "dc01.projectmate.ru","dc02.projectmate.ru","dc03.projectmate.ru","dc04.projectmate.ru","dc05.projectmate.ru","dc06.projectmate.ru"
 	} else {
@@ -506,7 +513,7 @@ Function Connect-Remote {
 		[Parameter(Mandatory=$true,Position=0)] [ValidateNotNullOrEmpty()] [string] $srv,
 		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential
 	)
-	if ($Credential -eq $null) {$Credential = Get-DCCredential}
+	if ($Credential -eq $null) {$Credential = Get-StoredCredential}
 	Enter-PSSession -ComputerName $srv -UseSSL -Credential $Credential
 }
 
