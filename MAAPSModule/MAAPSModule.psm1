@@ -585,6 +585,7 @@ Function Set-MAAAliases {
 	[array]$Aliases = 'Set-Alias -name cr Connect-Remote'
 	$Aliases += 'Set-Alias -name maav Get-MAAPSModuleVerions'
 	$Aliases += 'Set-Alias -name icc Invoke-ComDepCommand'
+	$Aliases += 'Set-Alias -name grep Select-ColorString'
 	foreach ($Alias in $Aliases) {
 		if ($PresentAliases -notcontains $Alias) {
 			#Write-Output $Alias | Out-File $AliasPath -Append
