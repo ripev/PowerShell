@@ -381,7 +381,10 @@ Function Get-NotStartedSVCs {
 		https://github.com/ripev/PowerShell/
 #>
 	param ($srv = "localhost")
-	Get-Service -ComputerName $srv | Where-Object {$_.starttype -match "Automatic" -and $_.status -ne "Running"}
+	$GetServicesCmd = {
+		Get-Service | Where-Object {$_.starttype -match "Automatic" -and $_.status -ne "Running"}
+	}
+	Invoke-Command -ScriptBlock $GetServicesCmd -ComputerName $srv
 }
 
 Function Get-RandomName {
