@@ -227,10 +227,11 @@ Function Get-SQLDbs {
 #>
 	Param (
 		[parameter(Mandatory=$true,ValueFromPipeline=$true)]
-			[String[]] $instance = "localhost",
+			[String[]] $instance,
 		[parameter(Mandatory=$false)]
 			[Switch] $all
 	)
+	if(!$instance){$instance = "localhost"}
 	$location = Get-Location
 	[System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | Out-Null
 	$server = New-Object ('Microsoft.SqlServer.Management.Smo.Server') "$instance"
@@ -245,7 +246,6 @@ Function Get-SQLDbs {
 	}
 	$Output=@()
 	foreach ($db in $DBs) {
-		
 		$query = "
 			with fs
 				as
@@ -668,11 +668,11 @@ Function Test-SSL {
 	$MailFrom="notifications@avicom.ru"
 	$SmtpServer="localmail.abt.local"
 	Try {
-		$Conn = New-Object System.Net.Sockets.TcpClient($WebsiteURL,$WebsitePort) 
-  
+		$Conn = New-Object System.Net.Sockets.TcpClient($WebsiteURL,$WebsitePort)
+
 		Try {
 			$Stream = New-Object System.Net.Security.SslStream($Conn.GetStream())
-			$Stream.AuthenticateAsClient($CommonName) 
+			$Stream.AuthenticateAsClient($CommonName)
 			$Cert = $Stream.Get_RemoteCertificate()
 			$ValidTo = [datetime]::Parse($Cert.GetExpirationDatestring())
 			Write-Host "`nConnection Successfull" -ForegroundColor DarkGreen
@@ -809,7 +809,7 @@ public class ISOFile
 		var ptr = (System.IntPtr)(&bytes);
 		var o = System.IO.File.OpenWrite(Path);
 		var i = Stream as System.Runtime.InteropServices.ComTypes.IStream;
-		
+
 		if (o != null) {
 			while (TotalBlocks-- > 0) {
 				i.Read(buf, BlockSize, ptr); o.Write(buf, 0, bytes);
@@ -832,7 +832,6 @@ public class ISOFile
 
 		Write-Verbose -Message "Selected media type is $Media with value $($MediaType.IndexOf($Media))"
 		($Image = New-Object -com IMAPI2FS.MsftFileSystemImage -Property @{VolumeName=$Title}).ChooseImageDefaultsForMediaType($MediaType.IndexOf($Media))
-	
 		if (!($Target = New-Item -Path $Path -ItemType File -Force:$Force -ErrorAction SilentlyContinue)) { Write-Error -Message "Cannot create file $Path. Use -Force parameter to overwrite if the target file already exists."; break }
 	}
 

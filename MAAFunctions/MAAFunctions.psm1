@@ -1,4 +1,4 @@
-﻿Function Get-MAAFunctions {
+﻿Function Get-MAAFunction {
 <#
 	.SYNOPSIS
 		Show MAA functions
@@ -28,12 +28,12 @@ Function Get-LoggedOnUser {
 		"11"="CachedInteractive" #(Local w\cached credentials)
 	}
 
-	$logon_sessions = @(gwmi win32_logonsession -ComputerName $computername)
-	$logon_users = @(gwmi win32_loggedonuser -ComputerName $computername)
+	$logon_sessions = @(Get-WmiObject win32_logonsession -ComputerName $computername)
+	$logon_users = @(Get-WmiObject win32_loggedonuser -ComputerName $computername)
 
 	$session_user = @{}
 
-	$logon_users |% {
+	$logon_users | ForEach-Object {
 		$_.antecedent -match $regexa > $nul
 		$username = $matches[1] + "\" + $matches[2]
 		$_.dependent -match $regexd > $nul
@@ -42,7 +42,7 @@ Function Get-LoggedOnUser {
 	}
 
 
-	$logon_sessions |%{
+	$logon_sessions | ForEach-Object{
 		$starttime = [management.managementdatetimeconverter]::todatetime($_.starttime)
 
 		$loggedonuser = New-Object -TypeName psobject
@@ -122,7 +122,6 @@ Function Invoke-SQLCustomScript {
 
 	.PARAMETER SQLScript
 		Sql script to query
-	
 	.PARAMETER VerboseOutput
 		Allow output text message after tsql execution
 
@@ -301,7 +300,7 @@ Function Set-PSWindowTitle {
 #>
 	param (
 		[Parameter (Mandatory=$true,Position=0)]
-			[String] $Title = "Windows PowerShell"
+			[String] $Title
 	)
 	# Checks that script not running in PowerShell ISE
 	if (!$psISE) {
@@ -437,9 +436,9 @@ function Get-LockedFileProcess {
 		[Parameter (Mandatory=$true,Position=0)]
 			[string] $lockedFile
 	)
-	Get-Process | foreach {
+	Get-Process | ForEach-Object {
 		$processVar = $_
-		$_.Modules | foreach {
+		$_.Modules | ForEach-Object {
 			if ($_.FileName -match $lockedFile) {
 				Write-Host $($processVar.Name) -NoNewline
 				Write-Host " PID: " -ForegroundColor Gray -NoNewline
@@ -504,7 +503,6 @@ function Select-ColorString {
 			'Yellow',
 			'White')]
 		[String]$ForegroundColor = 'Black',
-        
 		[Parameter()]
 		[ValidateSet(
 			'Black',
@@ -533,7 +531,6 @@ function Select-ColorString {
 			}
 		})]
 		[String]$BackgroundColor = 'Yellow',
-        
 		[Parameter()]
 		[Switch]$CaseSensitive,
 
@@ -542,14 +539,12 @@ function Select-ColorString {
 			HelpMessage = "If true, write only not matching lines; " `
 				+ "if false, write only matching lines")]
 		[Switch]$NotMatch,
-        
 		[Parameter(
 			ParameterSetName = 'Match',
 			HelpMessage = "If true, write all the lines; " `
 				+ "if false, write only matching lines")]
 		[Switch]$KeepNotMatch
 	)
-    
 	begin {
 		$paramSelectString = @{
 			Pattern       = $Pattern
@@ -558,18 +553,15 @@ function Select-ColorString {
 		}
 		$writeNotMatch = $KeepNotMatch -or $NotMatch
 	}
-    
 	process {
 		foreach ($line in $Content) {
 			$matchList = $line | Select-String @paramSelectString
-            
 			if (0 -lt $matchList.Count) {
 				if (-not $NotMatch) {
 					$index = 0
 					foreach ($myMatch in $matchList.Matches) {
 						$length = $myMatch.Index - $index
 						Write-Host $line.Substring($index, $length) -NoNewline
-                        
 						$paramWriteHost = @{
 							Object          = $line.Substring($myMatch.Index, $myMatch.Length)
 							NoNewline       = $true
@@ -577,7 +569,6 @@ function Select-ColorString {
 							BackgroundColor = $BackgroundColor
 						}
 						Write-Host @paramWriteHost
-                        
 						$index = $myMatch.Index + $myMatch.Length
 					}
 					Write-Host $line.Substring($index)
@@ -590,12 +581,11 @@ function Select-ColorString {
 			}
 		}
 	}
-    
 	end {
 	}
 }
 
-function Get-NetVersions {
+function Get-DotNetVersion {
 <#
 	.Synopsis
 		Get .net framework versions from Windows Registry
@@ -624,14 +614,13 @@ function Get-NetVersions {
 	}
 
 	$regPath = 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP'
-	
 	if (Test-Path $regPath -ErrorAction SilentlyContinue) {
 		Get-ChildItem $regPath -Recurse |
 			Get-ItemProperty -name Version, Release -EA 0 |
 			# For One True framework (latest .NET 4x), change match to PSChildName -eq "Full":
 				Where-Object { $_.PSChildName -match '^(?!S)\p{L}'} |
-					Select-Object @{name = ".NET Framework"; expression = {$_.PSChildName}}, 
-					@{name = "Product"; expression = {$Lookup[$_.Release]}}, 
+					Select-Object @{name = ".NET Framework"; expression = {$_.PSChildName}},
+					@{name = "Product"; expression = {$Lookup[$_.Release]}},
 					Version, Release
 	} else {
 		Write-Output "Reg path of .NET not found. .NET framework not installed or not considtent os version"
