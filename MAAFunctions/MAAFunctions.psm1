@@ -502,7 +502,7 @@ function Select-ColorString {
 			'Magenta',
 			'Yellow',
 			'White')]
-		[String]$ForegroundColor = 'Black',
+		[String]$ForegroundColor = 'Yellow',
 		[Parameter()]
 		[ValidateSet(
 			'Black',
@@ -530,7 +530,7 @@ function Select-ColorString {
 				return $true
 			}
 		})]
-		[String]$BackgroundColor = 'Yellow',
+		[String]$BackgroundColor = $Host.ui.RawUI.BackgroundColor,
 		[Parameter()]
 		[Switch]$CaseSensitive,
 
