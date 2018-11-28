@@ -469,13 +469,37 @@ Function Invoke-ComDepCommand {
 		[Parameter(Mandatory=$true,Position=0)] [String] $Command
 	)
 	$srvs = "spb-st-dev01","spb-pw-com1","spb-s-comdep","spb-s-kob1"
-	$Script = [Scriptblock]::Create($Command)
+	$JobItems=@();
+	$JobDatePreffix = (Get-Date).ToString("yyyy-MM-dd_HH-mm-ss")
+	$i=30;Write-Host ""("+"*$i)"`n  Starting jobs on all servers`n"("+"*$i) -ForegroundColor Cyan
 	foreach ($srv in $srvs) {
-		"`n Executing command`t" | Write-Host -NoNewline -ForegroundColor Gray
-		"'$Command'" | Write-Host -ForegroundColor Yellow
-		" on " | Write-Host -ForegroundColor Gray -NoNewline
-		"$srv`n" | Write-Host -ForegroundColor DarkCyan
-		Invoke-Command -ComputerName $srv -ScriptBlock $Script
+		$remoteCmd = {
+			$srv = $args[0]
+			$Command = $args[1]
+			$Script = [Scriptblock]::Create($Command)
+			Invoke-Command -ComputerName $srv -ScriptBlock $Script
+		}
+		$jobName = "$($JobDatePreffix)_$($srv )"
+		Start-Job -Name $jobName -ScriptBlock $remoteCmd -ArgumentList $srv,$Command | Out-Null
+		$JobItems += $jobName
+	}
+	
+	while ($JobItems.Length -gt 0) {
+		$jobs = Get-Job | where {$_.State -eq "Completed"}
+		if ($jobs.count -gt 0) {
+			foreach ($job in $jobs) {
+				if ($JobItems -match $job.Name) {
+					Write-Host "`nExecution on '" -f Gray -NoNewLine
+					Write-Host $job.Name -f Cyan -NoNewLine
+					Write-Host "' results:`n" -f Gray
+					Receive-Job -Name $job.Name
+					Remove-Job -Name $job.Name -Force
+					$NewJobItems = $JobItems | Where-Object {$_ -ne $job.name}
+					$JobItems = $NewJobItems
+					Remove-Variable -Name NewJobItems -Force -ErrorAction SilentlyContinue
+				}
+			}
+		}
 	}
 }
 
