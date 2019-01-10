@@ -637,7 +637,7 @@ function Get-Factorial ([int]$n) {
 #>
 	if ($n -eq 0) {[int]$t=1;$t}
 	else {
-		[long]$factorial = 1;
+		$factorial = 1;
 		for ($i=1;$i -le $n;$i++){
 			$factorial *= $i
 		}
