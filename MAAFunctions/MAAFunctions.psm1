@@ -627,3 +627,20 @@ function Get-DotNetVersion {
 	}
 
 }
+
+function Get-Factorial ([int]$n) {
+<#
+	.Synopsis
+		Get factorial from input int
+	.Description
+		Get factorial from input int
+#>
+	if ($n -eq 0) {[int]$t=1;$t}
+	else {
+		[long]$factorial = 1;
+		for ($i=1;$i -le $n;$i++){
+			$factorial *= $i
+		}
+		$factorial
+	}
+}
