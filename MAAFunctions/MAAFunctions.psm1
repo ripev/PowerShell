@@ -332,7 +332,7 @@ Function Get-PSWindowTitle {
 Function timeDurationOutput {
 	<#
 	.SYNOPSIS
-		Show time duration in readable format
+		Return or outputs time duration in readable format
 	.DESCRIPTION
 		Returns (convert) size in format #.### GB/MB/KB
 	.PARAMETER duration
@@ -343,8 +343,13 @@ Function timeDurationOutput {
 		Specify color for strings
 	.PARAMETER NoNewLine
 		No new line after output
+	.PARAMETER OutputToLine
+		Outputs string, unlike return
 	.EXAMPLE
 		timeDurationOutput [timespan]$duration
+		Return duration in '1 h 13 m 34 s' format
+	.EXAMPLE
+		timeDurationOutput [timespan]$duration -OutputToLine
 		Outputs duration in '1 h 13 m 34 s' format
 	.LINK
 		https://github.com/ripev/PowerShell/tree/master/MAAFunctions#timeDurationOutput
@@ -367,7 +372,9 @@ Function timeDurationOutput {
 			[ValidateSet("Black","DarkBlue","DarkGreen","DarkCyan","DarkRed","DarkMagenta","DarkYellow","Gray","DarkGray","Blue","Green","Cyan","Red","Magenta","Yellow","White")]
 			[String] $sColor = "Gray",
 		[Parameter (Mandatory=$false)]
-			[Switch] $NoNewLine
+			[Switch] $NoNewLine,
+		[Parameter (Mandatory=$false)]
+			[Switch] $OutputToLine
 	)
 	function NScolorOut {
 		param (
@@ -385,32 +392,59 @@ Function timeDurationOutput {
 	$hoursWithoutDays = [math]::Round($duration.TotalHours % 24)
 	$minutesWithoutHours = [math]::Round($duration.TotalMinutes % 60)
 	$secondsWithoutMinutes = [math]::Round($duration.TotalSeconds % 60)
-	# Days output
-	if ([math]::Round($duration.TotalDays) -gt 0) {
-		NScolorOut $duration.TotalDays " d" -NoNewLine
-		if ($hoursWithoutDays -gt 0 -or $minutesWithoutHours -gt 0 -or $secondsWithoutMinutes -gt 0) {
-			Write-Host " " -NoNewline
+	$returnValue = $null;
+	if ($OutputToLine) {
+		# Days output
+		if ([math]::Round($duration.TotalDays) -gt 0) {
+			NScolorOut $duration.TotalDays " d" -NoNewLine
+			if ($hoursWithoutDays -gt 0 -or $minutesWithoutHours -gt 0 -or $secondsWithoutMinutes -gt 0) {
+				Write-Host " " -NoNewline
+			}
 		}
-	}
-	# Hours output
-	if ($duration.TotalHours -gt 0 -and $hoursWithoutDays -gt 0) {
-		NScolorOut $($duration.TotalHours % 24) " h" -NoNewLine
-		if ($minutesWithoutHours -gt 0 -or $secondsWithoutMinutes -gt 0) {
-			Write-Host " " -NoNewline
+		# Hours output
+		if ($duration.TotalHours -gt 0 -and $hoursWithoutDays -gt 0) {
+			NScolorOut $($duration.TotalHours % 24) " h" -NoNewLine
+			if ($minutesWithoutHours -gt 0 -or $secondsWithoutMinutes -gt 0) {
+				Write-Host " " -NoNewline
+			}
 		}
-	}
-	# Minutes output
-	if ($duration.TotalMinutes -gt 0 -and $minutesWithoutHours -gt 0) {
-		NScolorOut $minutesWithoutHours " m" -NoNewLine
-		if ($secondsWithoutMinutes -gt 0) {
-			Write-Host " " -NoNewline
+		# Minutes output
+		if ($duration.TotalMinutes -gt 0 -and $minutesWithoutHours -gt 0) {
+			NScolorOut $minutesWithoutHours " m" -NoNewLine
+			if ($secondsWithoutMinutes -gt 0) {
+				Write-Host " " -NoNewline
+			}
 		}
+		# Seconds output
+		if ($duration.TotalSeconds -gt 0 -and $secondsWithoutMinutes -gt 0) {
+			NScolorOut $secondsWithoutMinutes " s" -NoNewLine
+		}
+		if (!$NoNewLine) {Write-Host ""}
+	} else {
+		# Days output
+		if ([math]::Round($duration.TotalDays) -gt 0) {
+			$returnValue += "$($duration.TotalDays) d"
+		}
+		# Hours output
+		if ($duration.TotalHours -gt 0 -and $hoursWithoutDays -gt 0) {
+			$returnValue += "$($duration.TotalHours % 24) h"
+			if ($minutesWithoutHours -gt 0 -or $secondsWithoutMinutes -gt 0) {
+				$returnValue += " "
+			}
+		}
+		# Minutes output
+		if ($duration.TotalMinutes -gt 0 -and $minutesWithoutHours -gt 0) {
+			$returnValue += "$($minutesWithoutHours) m"
+			if ($secondsWithoutMinutes -gt 0) {
+				$returnValue += " "
+			}
+		}
+		# Seconds output
+		if ($duration.TotalSeconds -gt 0 -and $secondsWithoutMinutes -gt 0) {
+			$returnValue += "$($secondsWithoutMinutes) s"
+		}
+		$returnValue
 	}
-	# Seconds output
-	if ($duration.TotalSeconds -gt 0 -and $secondsWithoutMinutes -gt 0) {
-		NScolorOut $secondsWithoutMinutes " s" -NoNewLine
-	}
-	if (!$NoNewLine) {Write-Host ""}
 }
 
 function Get-LockedFileProcess {
