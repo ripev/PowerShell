@@ -334,7 +334,7 @@ Function timeDurationOutput {
 	.SYNOPSIS
 		Return or outputs time duration in readable format
 	.DESCRIPTION
-		Returns (convert) size in format #.### GB/MB/KB
+		Return or outputs time duration in readable format
 	.PARAMETER duration
 		Input timespan to output
 	.PARAMETER nColor
@@ -423,11 +423,14 @@ Function timeDurationOutput {
 	} else {
 		# Days output
 		if ([math]::Round($duration.TotalDays) -gt 0) {
-			$returnValue += "$($duration.TotalDays) d"
+			$returnValue += "$([math]::Round($duration.TotalDays)) d"
+			if ($hoursWithoutDays -gt 0 -or $minutesWithoutHours -gt 0 -or $secondsWithoutMinutes -gt 0) {
+				$returnValue += " "
+			}
 		}
 		# Hours output
 		if ($duration.TotalHours -gt 0 -and $hoursWithoutDays -gt 0) {
-			$returnValue += "$($duration.TotalHours % 24) h"
+			$returnValue += "$([math]::Round($duration.TotalHours % 24)) h"
 			if ($minutesWithoutHours -gt 0 -or $secondsWithoutMinutes -gt 0) {
 				$returnValue += " "
 			}
