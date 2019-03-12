@@ -897,3 +897,13 @@ function Get-Uptime {
 		}
 	}
 }
+
+function Get-FilesDirectory ($path) {
+<#
+	.Synopsis
+		Returns folder of file
+	.Description
+		Returns folder of file
+#>
+	[System.IO.Path]::GetDirectoryName( $path )
+}
