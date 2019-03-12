@@ -485,7 +485,7 @@ Function Invoke-ComDepCommand {
 	}
 	
 	while ($JobItems.Length -gt 0) {
-		$jobs = Get-Job | where {$_.State -eq "Completed"}
+		$jobs = Get-Job | Where-Object {$_.State -eq "Completed"}
 		if ($jobs.count -gt 0) {
 			foreach ($job in $jobs) {
 				if ($JobItems -match $job.Name) {
