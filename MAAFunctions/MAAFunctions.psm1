@@ -166,7 +166,7 @@ Function Invoke-SQLCustomScript {
 	#endregion parsing servername/port
 
 	#region testing sqlserver connection available
-	if (testport $SQLServerName $SQLServerPort 200){
+	if (Test-PortAvailable $SQLServerName $SQLServerPort 200){
 		$StartLocation = Get-Location
 		$SqlConnection = New-Object System.Data.SqlClient.SqlConnection
 		$SqlConnection.ConnectionString = "Server = $SQLInstance; Database = $SQLDBName; Integrated Security = "
@@ -273,6 +273,15 @@ Function Test-Port {
 	Finally {
 		$test.Dispose();
 	}
+}
+
+function Test-PortAvailable ([string]$hostname,[int]$port,[int]$timeout) {
+	$client = New-Object System.Net.Sockets.TcpClient
+	$null = $client.BeginConnect($hostname,$port,$null,$null)
+	Start-Sleep -milliseconds $timeOut
+	if ($client.Connected) { $connectionOpen = $true } else { $connectionOpen = $false }
+	$client.Close()
+	Return $connectionOpen
 }
 
 Function fileSizeOutput {
@@ -703,13 +712,4 @@ function Get-Factorial ([int]$n) {
 		}
 		$factorial
 	}
-}
-
-function testport ([string]$hostname,[int]$port,[int]$timeout) {
-	$client = New-Object System.Net.Sockets.TcpClient
-	$null = $client.BeginConnect($hostname,$port,$null,$null)
-	Start-Sleep -milliseconds $timeOut
-	if ($client.Connected) { $connectionOpen = $true } else { $connectionOpen = $false }
-	$client.Close()
-	Return $connectionOpen
 }
