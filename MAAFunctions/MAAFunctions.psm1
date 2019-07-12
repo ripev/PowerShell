@@ -151,39 +151,62 @@ Function Invoke-SQLCustomScript {
 		[Parameter(Mandatory=$false)]
 			[String] $Timeout = 60000
 	)
-	$StartLocation = Get-Location
-	$SqlConnection = New-Object System.Data.SqlClient.SqlConnection
-	$SqlConnection.ConnectionString = "Server = $SQLInstance; Database = $SQLDBName; Integrated Security = "
-	if (!$SQLLogin) {
-		$SqlConnection.ConnectionString += "true;"
+	#region parsing servername/port
+	if ($SQLInstance -match "^(.*)(\,)(\d{1,5})") {
+		$null = $SQLInstance -match "^(.*)(\,)(\d{1,5})"
+		[string] $SQLServerName = $Matches[1]
+		[int] $SQLServerPort = $Matches[3]
+	} elseif ($SQLInstance -match "^(.*)(\\)(\D)") {
+		[string] $SQLServerName = $Matches[1]
+		[int] $SQLServerPort = 1433
 	} else {
-		$SqlConnection.ConnectionString += "false; user id = $($SQLLogin); password = $($SQLPassword);"
+		[string] $SQLServerName = $SQLInstance
+		[int] $SQLServerPort = 1433
 	}
-	if ($VerboseOutput) {
-		if ($OutputFile) {
-			if ((Test-Path $OutputFile) -eq $false) {
-				New-Item $OutputFile -Type File | Out-Null
-			} else {
-				Remove-Item $OutputFile -Force
-			}
-			$handler = [System.Data.SqlClient.SqlInfoMessageEventHandler] {param($sender, $event) Write-Output $event.Message | Out-File $OutputFile -Encoding UTF8 -Append}
+	#endregion parsing servername/port
+
+	#region testing sqlserver connection available
+	if (testport $SQLServerName $SQLServerPort 200){
+		$StartLocation = Get-Location
+		$SqlConnection = New-Object System.Data.SqlClient.SqlConnection
+		$SqlConnection.ConnectionString = "Server = $SQLInstance; Database = $SQLDBName; Integrated Security = "
+		if (!$SQLLogin) {
+			$SqlConnection.ConnectionString += "true;"
 		} else {
-			$handler = [System.Data.SqlClient.SqlInfoMessageEventHandler] {param($sender, $event) Write-Host $event.Message }
+			$SqlConnection.ConnectionString += "false; user id = $($SQLLogin); password = $($SQLPassword);"
 		}
-		$SqlConnection.add_InfoMessage($handler)
-		$SqlConnection.FireInfoMessageEventOnUserErrors = $true
-	}
-	$SqlCmd = New-Object System.Data.SqlClient.SqlCommand
-	$SqlCmd.CommandText = $SQLScript
-	$SqlCmd.Connection = $SqlConnection
-	$SqlCmd.CommandTimeout = $Timeout
-	$SqlAdapter = New-Object System.Data.SqlClient.SqlDataAdapter
-	$SqlAdapter.SelectCommand = $SqlCmd
-	$DataSet = New-Object System.Data.DataSet
-	$SqlAdapter.Fill($DataSet) | Out-Null
-	$SqlConnection.Close()
-	$DataSet.Tables[0]
-	Set-Location $StartLocation
+		if ($VerboseOutput) {
+			if ($OutputFile) {
+				if ((Test-Path $OutputFile) -eq $false) {
+					New-Item $OutputFile -Type File | Out-Null
+				} else {
+					Remove-Item $OutputFile -Force
+				}
+				$handler = [System.Data.SqlClient.SqlInfoMessageEventHandler] {param($sender, $event) Write-Output $event.Message | Out-File $OutputFile -Encoding UTF8 -Append}
+			} else {
+				$handler = [System.Data.SqlClient.SqlInfoMessageEventHandler] {param($sender, $event) Write-Host $event.Message }
+			}
+			$SqlConnection.add_InfoMessage($handler)
+			$SqlConnection.FireInfoMessageEventOnUserErrors = $true
+		}
+		Try {
+			$SqlCmd = New-Object System.Data.SqlClient.SqlCommand
+			$SqlCmd.CommandText = $SQLScript
+			$SqlCmd.Connection = $SqlConnection
+			$SqlCmd.CommandTimeout = $Timeout
+			$SqlAdapter = New-Object System.Data.SqlClient.SqlDataAdapter
+			$SqlAdapter.SelectCommand = $SqlCmd
+			$DataSet = New-Object System.Data.DataSet
+			$null = $SqlAdapter.Fill($DataSet)
+			$SqlConnection.Close()
+			Set-Location $StartLocation
+			$DataSet.Tables[0]
+		} Catch {
+			Set-Location $StartLocation
+			Write-Warning 'Cannot proceed sql request - last error can be seen $Error[0].Exception.Message.Split(":")[1]'
+		}
+	} else { Write-Warning "Connection to '$($SQLInstance)' cannot be established." }
+	#endregion testing sqlserver connection available
 }
 
 Function New-CustomGuid {
@@ -680,4 +703,13 @@ function Get-Factorial ([int]$n) {
 		}
 		$factorial
 	}
+}
+
+function testport ([string]$hostname,[int]$port,[int]$timeout) {
+	$client = New-Object System.Net.Sockets.TcpClient
+	$null = $client.BeginConnect($hostname,$port,$null,$null)
+	Start-Sleep -milliseconds $timeOut
+	if ($client.Connected) { $connectionOpen = $true } else { $connectionOpen = $false }
+	$client.Close()
+	Return $connectionOpen
 }
