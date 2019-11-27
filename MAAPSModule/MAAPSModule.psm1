@@ -906,4 +906,31 @@ function Get-FilesDirectory ($path) {
 		Returns folder of file
 #>
 	[System.IO.Path]::GetDirectoryName( $path )
+
+}
+
+function ConvertTo-Base64 {
+<#
+	.Synopsis
+		Convert string to base64
+#>
+	param (
+		[Parameter(ValueFromPipeline=$true)]
+		[String] $inputString
+	)
+	$base64string = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($inputString))
+	return $base64string
+}
+
+function ConvertFrom-Base64 {
+<#
+	.Synopsis
+		Convert string from base64
+#>
+	param (
+		[Parameter(ValueFromPipeline=$true)]
+		[String] $inputString
+	)
+	$convertedString = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($inputString))
+	return $convertedString
 }
