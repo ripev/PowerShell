@@ -710,7 +710,7 @@ function Get-Factorial ([int]$n) {
 		for ($i=1;$i -le $n;$i++){
 			$factorial *= $i
 		}
-		$factorial
+		return $factorial
 	}
 }
 
