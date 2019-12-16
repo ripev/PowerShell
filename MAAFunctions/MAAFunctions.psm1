@@ -713,3 +713,28 @@ function Get-Factorial ([int]$n) {
 		$factorial
 	}
 }
+
+function Set-ColorExpressionOutput {
+    # desription https://stackoverflow.com/questions/20705102/how-to-colorise-powershell-output-of-format-table
+    # colors https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#span-idtextformattingspanspan-idtextformattingspanspan-idtextformattingspantext-formatting
+	param (
+		[Parameter(Mandatory=$true,Position=0)]
+			$data,
+		[Parameter(Mandatory=$false,Position=1)]
+            [ValidateSet ("black","red","green","yellow","blue","magenta","cyan","white","default")]
+			[string] $color = "default"
+	)
+	switch ($color) {
+        "black"   {$col=30;break}
+		"red"     {$col=31;break}
+        "green"   {$col=32;break}
+        "yellow"  {$col=33;break}
+        "blue"    {$col=34;break}
+        "magenta" {$col=35;break}
+        "cyan"    {$col=36;break}
+        "white"   {$col=37;break}
+        "default" {$col=39;break}
+	}
+	$e=[char]27
+	"$e[${col}m$($data)${e}[0m"
+}
