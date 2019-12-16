@@ -455,7 +455,7 @@ Function Invoke-ComDepCommand {
 			$Script = [Scriptblock]::Create($Command)
 			Invoke-Command -ComputerName $srv -ScriptBlock $Script
 		}
-		$jobName = "$($JobDatePreffix)_$($srv )"
+		$jobName = "$($JobDatePreffix)_$($srv)"
 		Start-Job -Name $jobName -ScriptBlock $remoteCmd -ArgumentList $srv,$Command | Out-Null
 		$JobItems += $jobName
 	}
@@ -465,8 +465,14 @@ Function Invoke-ComDepCommand {
 		if ($jobs.count -gt 0) {
 			foreach ($job in $jobs) {
 				if ($JobItems -match $job.Name) {
+					[string] $matchRegex = "^(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}_)(.*)$"
+					if ($job.Name -match $matchRegex) {
+						[string] $computerName = $Matches[2]
+					} else {
+						[string] $computerName = $job.Name
+					}
 					Write-Host "`nExecution on '" -f Gray -NoNewLine
-					Write-Host $job.Name -f Cyan -NoNewLine
+					Write-Host $computerName -f Cyan -NoNewLine
 					Write-Host "' results:`n" -f Gray
 					Receive-Job -Name $job.Name
 					Remove-Job -Name $job.Name -Force
