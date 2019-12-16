@@ -680,6 +680,8 @@ function Get-DotNetVersion {
 		461310 = [version]'4.7.1'
 		461808 = [version]'4.7.2'
 		461814 = [version]'4.7.2'
+		528040 = [version]'4.8'
+		528049 = [version]'4.8'
 	}
 
 	$regPath = 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP'
