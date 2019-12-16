@@ -422,30 +422,6 @@ Function Get-RandomName {
 	[String]$characters[$random]
 }
 
-Function Invoke-ABTPSScript {
-<#
-	.SYNOPSIS
-		Run script from ABT source
-
-	.DESCRIPTION
-		Get scrip content from ABT site and execute
-
-	.PARAMETER name
-		Set script name parameter, wich should be executed
-
-	.EXAMPLE
-		Invoke-ABTPSScript test
-
-		Download and execute script from link https://avicom.ru/uploader/ps1/test.ps1
-
-	.LINK
-		https://github.com/ripev/PowerShell/
-#>
- Param ([Parameter(Mandatory=$true,Position=1)][String]$name)
- $url = "https://avicom.ru/uploader/ps1/" + $name + ".ps1"
-	Invoke-Expression ((new-object net.webclient).DownloadString("$url"))
-}
-
 Function Invoke-ComDepCommand {
 <#
 	.SYNOPSIS
@@ -468,7 +444,7 @@ Function Invoke-ComDepCommand {
 	Param(
 		[Parameter(Mandatory=$true,Position=0)] [String] $Command
 	)
-	$srvs = "spb-st-dev01","spb-pw-com1","spb-s-comdep","spb-s-kob1"
+	$srvs = "spb-st-dev01","spb-pw-com1","spb-s-comdep","spb-s-kob1","pw-pos-srv1","pw-pos-srv2"
 	$JobItems=@();
 	$JobDatePreffix = (Get-Date).ToString("yyyy-MM-dd_HH-mm-ss")
 	$i=30;Write-Host ""("+"*$i)"`n  Starting jobs on all servers`n"("+"*$i) -ForegroundColor Cyan
