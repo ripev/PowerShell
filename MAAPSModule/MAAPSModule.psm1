@@ -49,10 +49,10 @@ Function Get-MAAPSModuleVerions {
 #>
 	$InternetVersion = (Get-MAAPSModuleInternetVersion).Version
 	Write-Host "Internet version of modules is:`t" -ForegroundColor Yellow -NoNewline
-	Write-Host "$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build).$($InternetVersion.Revision)" -ForegroundColor Green
+	Write-Host "$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)" -ForegroundColor Green
 	$LocalVersion = Get-MAAPSModuleLocalVersion
 	Write-Host "Local version of modules is:`t" -ForegroundColor Yellow -NoNewline
-	Write-Host "$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build).$($LocalVersion.Revision)" -ForegroundColor Green
+	Write-Host "$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build)" -ForegroundColor Green
 	if ($LocalVersion -ne $InternetVersion) {
 		Write-Output "`nLocal and Internet versions is mismatch. You should update local version"
 	}
@@ -109,9 +109,9 @@ Function Update-MAAPSModule {
 				Write-Host "Forcing update of local modules" -ForegroundColor Yellow
 			} else {
 				Write-Host "Updating local version from '" -ForegroundColor Gray -NoNewline
-				Write-Host "$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build).$($LocalVersion.Revision)" -ForegroundColor Yellow -NoNewline
+				Write-Host "$($LocalVersion.Major).$($LocalVersion.Minor).$($LocalVersion.Build)" -ForegroundColor Yellow -NoNewline
 				Write-Host "' to '" -ForegroundColor Gray -NoNewline
-				Write-Host "$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build).$($InternetVersion.Revision)" -ForegroundColor Yellow -NoNewline
+				Write-Host "$($InternetVersion.Major).$($InternetVersion.Minor).$($InternetVersion.Build)" -ForegroundColor Yellow -NoNewline
 				Write-Host "'" -ForegroundColor Gray
 			}
 			Copy-Item "$psd1temp" "$MAAPSModulePath\MAAPSModule.psd1" -Force -ErrorAction Stop
