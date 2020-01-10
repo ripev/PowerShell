@@ -183,6 +183,7 @@ Function Get-LocalDisk {
 	Select-Object `
 		DriveLetter,Label,FileSystem,`
 	@{l="FreeSpace";e={"$([math]::Round(($_.FreeSpace / 1GB), 2)) GB"}},`
+	@{l="Free %";e={"$([math]::Round(($_.FreeSpace / $_.Capacity * 100), 2)) %"}},`
 	@{l="Size";e={"$([math]::Round(($_.Capacity / 1GB), 2)) GB"}} | `
 	Sort-Object DriveLetter
 }
