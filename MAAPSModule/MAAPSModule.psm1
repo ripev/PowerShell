@@ -160,7 +160,9 @@ Function Update-MAAFunctions {
 Function Get-StoredCredential {
 <#
 	.SYNOPSIS
-		Subfunction used in connect functions (Connect-Remote, etc.)
+		Get secured sctring from file
+	.DESCRIPTION
+		Subfunction used in connect functions
 
 	.LINK
 		https://github.com/ripev/PowerShell/
@@ -637,9 +639,9 @@ Function Get-WAS7daysErrors {
 Function Test-SSL {
 <#
 	.SYNOPSIS
-		Check-SSL.ps1 - Gets SSL certificate expiration date
+		Gets SSL certificate expiration date
 	.DESCRIPTION
-		Check-SSL.ps1 - Gets SSL certificate expiration date and send an email alert if a defined threshold is exceeded.
+		Gets SSL certificate expiration date and send an email alert if a defined threshold is exceeded.
 	.PARAMETER WebsiteURL
 		Defines the URL of the SSL certificate to check
 		Mandatory parameter
@@ -869,6 +871,10 @@ public class ISOFile
 }
 
 function Get-Uptime {
+<#
+	.SYNOPSIS
+		Get pretty uptime via WMI
+#>
 	Get-CimInstance -ClassName win32_operatingsystem | `
 	Select-Object @{n="ComputerName";e={$_.CSName}},LastBootUpTime,`
 	@{n="Uptime";e={
