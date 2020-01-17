@@ -925,5 +925,5 @@ function ConvertFrom-Base64 {
 
 Set-Alias -name cr Connect-Remote
 Set-Alias -name icc Invoke-ComDepCommand
-Set-Alias -name maaf Get-MAACommands
+Set-Alias -name maac Get-MAACommands
 Set-Alias -name maav Get-MAAPSModuleVerions
