@@ -1,4 +1,4 @@
-﻿$MAAPSModulePSD1url = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
+$MAAPSModulePSD1url = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psd1"
 $MAAPSModulePSM1url = "https://raw.githubusercontent.com/ripev/PowerShell/master/MAAPSModule/MAAPSModule.psm1"
 
 Function Get-MAAPSModuleInternetVersion {
@@ -61,7 +61,7 @@ Function Get-MAAPSModuleVerions {
 Function Get-MAACommands {
 <#
 	.SYNOPSIS
-		Show MAA module commands
+		Show MAA module commands with aliases
 
 	.DESCRIPTION
 		Alias for get-command from MAAPSModule
@@ -69,7 +69,28 @@ Function Get-MAACommands {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
-	Get-Command | Where-Object {$_.ModuleName -eq "MAAPSModule"}
+Get-Command -Module MAAPSModule | Select-Object `
+	@{l="Command";e={
+		if ($psISE) {
+			"$($_.Name)"
+		} else {
+			$e = [char]27
+			$color = "93"
+			"$e[${color}m$($_.Name)${e}[0m"
+		}
+	}},`
+	@{l="Synopsis";e={$((Get-Help $_.Name).Synopsis)}},`
+	@{l="Alias";e={
+		$name=$_.Name;
+		$alias = Get-Alias|Where-Object{$_.DisplayName -match "$name"}|Select-Object -First 1
+		if ($psISE) {
+			"$($alias)"
+		} else {
+			$e = [char]27
+			$color = "36"
+			"$e[${color}m$($alias)${e}[0m"
+		}
+	}} | Format-Table -AutoSize
 }
 
 Function Update-MAAPSModule {
@@ -898,4 +919,5 @@ function ConvertFrom-Base64 {
 
 Set-Alias -name cr Connect-Remote
 Set-Alias -name icc Invoke-ComDepCommand
+Set-Alias -name maaf Get-MAACommands
 Set-Alias -name maav Get-MAAPSModuleVerions
