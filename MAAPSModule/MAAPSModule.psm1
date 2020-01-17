@@ -69,28 +69,29 @@ Function Get-MAACommands {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
-Get-Command -Module MAAPSModule | Select-Object `
-	@{l="Command";e={
-		if ($psISE) {
-			"$($_.Name)"
-		} else {
-			$e = [char]27
-			$color = "93"
-			"$e[${color}m$($_.Name)${e}[0m"
-		}
-	}},`
-	@{l="Synopsis";e={$((Get-Help $_.Name).Synopsis)}},`
-	@{l="Alias";e={
-		$name=$_.Name;
-		$alias = Get-Alias|Where-Object{$_.DisplayName -match "$name"}|Select-Object -First 1
-		if ($psISE) {
-			"$($alias)"
-		} else {
-			$e = [char]27
-			$color = "36"
-			"$e[${color}m$($alias)${e}[0m"
-		}
-	}} | Format-Table -AutoSize
+	[array] $allAliases = Get-Alias | Where-Object {$_.Source -eq "MAAPSmodule"}
+	Get-Command -Module MAAPSModule | Select-Object `
+		@{l="Command";e={
+			if ($psISE) {
+				"$($_.Name)"
+			} else {
+				$e = [char]27
+				$color = "93"
+				"$e[${color}m$($_.Name)${e}[0m"
+			}
+		}},`
+		@{l="Synopsis";e={$((Get-Help $_.Name).Synopsis)}},`
+		@{l="Alias";e={
+			$name=$_.Name;
+			$alias = $allAliases | Where-Object {$_.DisplayName -match $name} | Select-Object -First 1
+			if ($psISE) {
+				"$($alias)"
+			} else {
+				$e = [char]27
+				$color = "36"
+				"$e[${color}m$($alias)${e}[0m"
+			}
+		}} | Format-Table -AutoSize
 }
 
 Function Update-MAAPSModule {

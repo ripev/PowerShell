@@ -6,6 +6,7 @@
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
+	[array] $allAliases = Get-Alias | Where-Object {$_.Source -eq "MAAPFunctions"}
 	Get-Command -Module MAAFunctions | Select-Object `
 		@{l="Command";e={
 			if ($psISE) {
@@ -19,7 +20,7 @@
 		@{l="Synopsis";e={$((Get-Help $_.Name).Synopsis)}},`
 		@{l="Alias";e={
 			$name=$_.Name;
-			$alias = Get-Alias|Where-Object{$_.DisplayName -match "$name"}|Select-Object -First 1
+			$alias = $allAliases | Where-Object {$_.DisplayName -match $name} | Select-Object -First 1
 			if ($psISE) {
 				"$($alias)"
 			} else {
