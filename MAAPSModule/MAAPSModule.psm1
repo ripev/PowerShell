@@ -579,28 +579,6 @@ Function Get-File {
 	}
 }
 
-Function Set-MAAAliases {
-<#
-	.SYNOPSIS
-		Set aliases
-
-	.LINK
-		https://github.com/ripev/PowerShell/
-#>
-	$AliasPath = (Get-Variable profile).Value
-	$PresentAliases = Get-Content $AliasPath
-	[array]$Aliases = 'Set-Alias -name cr Connect-Remote'
-	$Aliases += 'Set-Alias -name maav Get-MAAPSModuleVerions'
-	$Aliases += 'Set-Alias -name icc Invoke-ComDepCommand'
-	$Aliases += 'Set-Alias -name grep Select-ColorString'
-	foreach ($Alias in $Aliases) {
-		if ($PresentAliases -notcontains $Alias) {
-			#Write-Output $Alias | Out-File $AliasPath -Append
-			$Alias | Add-Content $AliasPath
-		}
-	}
-}
-
 Function Get-StoppedAppPools {
 <#
 	.SYNOPSIS
@@ -917,3 +895,7 @@ function ConvertFrom-Base64 {
 	$convertedString = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($inputString))
 	return $convertedString
 }
+
+Set-Alias -name cr Connect-Remote
+Set-Alias -name icc Invoke-ComDepCommand
+Set-Alias -name maav Get-MAAPSModuleVerions

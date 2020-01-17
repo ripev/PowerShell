@@ -728,7 +728,7 @@ function Set-ColorExpressionOutput {
 	)
 	switch ($color) {
         "black"   {$col=30;break}
-		"red"     {$col=31;break}
+				"red"     {$col=31;break}
         "green"   {$col=32;break}
         "yellow"  {$col=33;break}
         "blue"    {$col=34;break}
@@ -740,3 +740,6 @@ function Set-ColorExpressionOutput {
 	$e=[char]27
 	"$e[${col}m$($data)${e}[0m"
 }
+
+Set-Alias -name glf Get-LockedFileProcess
+Set-Alias -name grep Select-ColorString
