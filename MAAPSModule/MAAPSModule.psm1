@@ -924,7 +924,41 @@ function ConvertFrom-Base64 {
 	return $convertedString
 }
 
+function Capture-Screen
+{
+	<#
+		.Synopsis
+			Create full screen shot
+		.LINK
+			https://gist.github.com/farag2/25747b927e76ccb24e23c6d0d25715ad
+	#>
+	Param([string]$Path)
+	Try {
+		if (-not $Path) { $Path = "$($env:OneDrive)\images\screenshots" }
+		IF (-not (Test-Path -Path $Path)) {
+			New-Item -Path $Path -ItemType Directory -Force
+		}
+	} Catch {           $Path = (Get-Location).Path }
+	$FileName = "$(Get-Date -f yyyy-MM-dd_HHmmss).bmp"
+	$File = "$Path\$FileName"
+	Add-Type -AssemblyName System.Windows.Forms
+	Add-Type -AssemblyName System.Drawing
+	$Screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
+	$Width = $Screen.Width
+	$Height = $Screen.Height
+	$Left = $Screen.Left
+	$Top = $Screen.Top
+	# Create bitmap using the top-left and bottom-right bounds
+	$bitmap = New-Object System.Drawing.Bitmap $Width, $Height
+	# Create Graphics object
+	$graphic = [System.Drawing.Graphics]::FromImage($bitmap)
+	# Capture screen
+	$graphic.CopyFromScreen($Left, $Top, 0, 0, $bitmap.Size)
+	$bitmap.Save($File)
+}
+
 Set-Alias -name cr Connect-Remote
+Set-Alias -name cs Capture-Screen
 Set-Alias -name icc Invoke-ComDepCommand
 Set-Alias -name maac Get-MAACommands
 Set-Alias -name maav Get-MAAPSModuleVerions
