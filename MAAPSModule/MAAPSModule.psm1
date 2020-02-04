@@ -934,9 +934,14 @@ function Capture-Screen
 	#>
 	Param([string]$Path)
 	Try {
-		if (-not $Path) { $Path = "$($env:OneDrive)\images\screenshots" }
+		if ($env:OneDrive) {
+			[string] $rootPath = "$($env:OneDrive)\images\screenshots"
+		} else {
+			[string] $rootPath = "."
+		}
+		if (-not $Path) { $Path = $rootPath }
 		IF (-not (Test-Path -Path $Path)) {
-			New-Item -Path $Path -ItemType Directory -Force
+			$null = New-Item -Path $Path -ItemType Directory -Force
 		}
 	} Catch {           $Path = (Get-Location).Path }
 	$FileName = "$(Get-Date -f yyyy-MM-dd_HHmmss).bmp"
