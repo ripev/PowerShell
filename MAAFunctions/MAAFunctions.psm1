@@ -188,7 +188,14 @@ Function Invoke-SQLCustomScript {
 	#endregion parsing servername/port
 
 	#region testing sqlserver connection available
-	if (Test-PortAvailable $SQLServerName $SQLServerPort 200){
+	[int] $testCounter      = 0;
+	[int] $maxTests         = 5;
+	[bool] $serverAvailable = $false;
+	while (-not $serverAvailable -and $testCounter -lt $maxTests) {
+		$serverAvailable = Test-PortAvailable $SQLServerName $SQLServerPort 200
+		$testCounter++
+	}
+	if ($serverAvailable) {
 		$StartLocation = Get-Location
 		$SqlConnection = New-Object System.Data.SqlClient.SqlConnection
 		$SqlConnection.ConnectionString = "Server = $SQLInstance; Database = $SQLDBName; Integrated Security = "
