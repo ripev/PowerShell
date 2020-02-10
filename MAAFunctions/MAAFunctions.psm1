@@ -770,6 +770,18 @@ function Set-ColorExpressionOutput {
 	"$e[${col}m$($data)${e}[0m"
 }
 
+function Clear-Spaces {
+<#
+	.Synopsis
+		Cut first and last spaces
+#>
+	param(
+		[Parameter(Mandatory=$true,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)]
+		[string] $InputObject
+	)
+	Return $($InputObject -replace "\s+$","" -replace "^\s+","")
+}
+
 Set-Alias -name glf Get-LockedFileProcess
 Set-Alias -name grep Select-ColorString
 Set-Alias -name maaf Get-MAAFunctions
