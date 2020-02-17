@@ -232,7 +232,7 @@ Function Invoke-SQLCustomScript {
 			$DataSet.Tables[0]
 		} Catch {
 			Set-Location $StartLocation
-			Write-Warning 'Cannot proceed sql request - last error can be seen $Error[0].Exception.Message.Split(":")[1]'
+			Write-Error $_.Exception.Message.Split(":")[1]
 		}
 	} else { Write-Warning "Connection to '$($SQLInstance)' cannot be established." }
 	#endregion testing sqlserver connection available
