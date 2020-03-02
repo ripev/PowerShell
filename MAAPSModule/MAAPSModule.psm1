@@ -650,12 +650,6 @@ Function Test-SSL {
 	.PARAMETER WebsitePort
 		Defines the website port of the SSL certificate to check
 		Default is 443.
-	.PARAMETER CommonName
-		Defines the CommonName (CN) of the SSL certificate to check
-		Default is the value of the WebsiteURL parameter.
-	.PARAMETER Threshold
-		Defines the threshold (in days). If the SSL certificate expiration date exceeded the threshold, an email alert is sent.
-		Default is 15.
 	.NOTES
 		File Name   : Check-SSL.ps1
 		Author      : Fabrice ZERROUKI - fabricezerrouki@hotmail.com
@@ -667,60 +661,29 @@ Function Test-SSL {
 #>
 	Param(
 		[Parameter(Mandatory=$true,Position=0,HelpMessage="IP address or hostname to check")][string]$WebsiteURL,
-		[Parameter(Position=1,HelpMessage="The number of days after which an alert should be sent.")][int]$Threshold=15,
-		[Parameter(Position=2,HelpMessage="TCP port number that SSL application is listening on")][int]$WebsitePort=443,
-		[Parameter(Position=3)][switch]$MailSend,
-		[Parameter(HelpMessage="CommonName (CN) on certificate")][string]$CommonName=$WebsiteURL
+		[Parameter(Position=1,HelpMessage="TCP port number that SSL application is listening on")][int]$WebsitePort=443
 	)
-	$Error.Clear()
-	$MailTo="andrey.makovetsky@avicom.ru"
-	$MailFrom="notifications@avicom.ru"
-	$SmtpServer="localmail.abt.local"
+	[datetime] $today = Get-Date
 	Try {
 		$Conn = New-Object System.Net.Sockets.TcpClient($WebsiteURL,$WebsitePort)
-
 		Try {
 			$Stream = New-Object System.Net.Security.SslStream($Conn.GetStream())
-			$Stream.AuthenticateAsClient($CommonName)
+			$Stream.AuthenticateAsClient($WebsiteURL)
 			$Cert = $Stream.Get_RemoteCertificate()
 			$ValidTo = [datetime]::Parse($Cert.GetExpirationDatestring())
-			Write-Host "`nConnection Successfull" -ForegroundColor DarkGreen
-			Write-Host "Website: $WebsiteURL"
-			$ValidDays = $($ValidTo - [datetime]::Now).Days
-			if ($ValidDays -lt $Threshold) {
-				Write-Host "`nStatus: Warning (Expires in $ValidDays days)" -ForegroundColor Yellow
-				Write-Host "CertExpiration: $ValidTo`n" -ForegroundColor Yellow
-				try {
-					$MailSubject="$WebsiteURL - SSL certificate will expire in $ValidDays days"
-					$MailBody=@"
-						<html><span style='font-family: Tahoma; font-size: 12px;' >Hi,<br />
-						<br />
-						the SSL certificate for the website "$WebsiteURL" will expire in $ValidDays days. You should conserder renewing it.<br />
-						<br />
-						----------------------------------------------------------------------------</span><br />
-						<span style='font-family: Tahoma; font-size: 10px;' >This is an automatically generated email, please do not reply.<br />&nbsp;<br /></span></html>
-"@
-					if ($MailSendOption) {
-						Send-MailMessage -To $MailTo -Subject $MailSubject -From $MailFrom -SmtpServer $SmtpServer -Priority High -BodyAsHtml $MailBody -ErrorAction Stop
-					}
-				}
-				catch {
-					Write-Host "Cannot send email with message:" -ForegroundColor DarkGray
-					Write-Host "$($_.Exception.Message)" -ForegroundColor Red
-				}
-			} else {
-				Write-Host "`nStatus: OK" -ForegroundColor DarkGreen
-				Write-Host "CertExpiration: $ValidTo`n" -ForegroundColor DarkGreen
-			}
+			$out = New-Object System.Object
+			$out | Add-Member NoteProperty -Name "site"          -Value $WebsiteURL
+			$out | Add-Member NoteProperty -Name "expirationDay" -Value $ValidTo
+			$out | Add-Member NoteProperty -Name "daysToExpire"  -Value $($ValidTo - $today).Days
+			Return $out
 		}
 		Catch { Throw $_ }
 		Finally { $Conn.close() }
-		}
+	}
 	Catch {
-			Write-Host "`nError occurred connecting to $($WebsiteURL)" -ForegroundColor Yellow
-			Write-Host "Website: $WebsiteURL"
-			Write-Host "Status:" $_.exception.innerexception.message -ForegroundColor Yellow
-			Write-Host ""
+		Write-Host "Error occurred connecting to $($WebsiteURL)" -ForegroundColor Yellow
+		Write-Host "Website: $($WebsiteURL)"
+		Write-Host "Status:" $_.exception.innerexception.message -ForegroundColor Yellow
 	}
 }
 
