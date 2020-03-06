@@ -450,9 +450,9 @@ Function timeDurationOutput {
 		Write-Host $s -ForegroundColor $sColor -NoNewline
 		if (!$NoNewLine) {Write-Host ""}
 	}
-	$hoursWithoutDays = [math]::Round($duration.TotalHours % 24)
-	$minutesWithoutHours = [math]::Round($duration.TotalMinutes % 60)
-	$secondsWithoutMinutes = [math]::Round($duration.TotalSeconds % 60)
+	$hoursWithoutDays = $duration.Hours
+	$minutesWithoutHours = $duration.Minutes
+	$secondsWithoutMinutes = $duration.Seconds
 	$returnValue = $null;
 	if ($OutputToLine) {
 		# Days output
