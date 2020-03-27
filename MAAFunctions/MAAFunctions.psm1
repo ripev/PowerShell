@@ -793,7 +793,7 @@ function ConvertFrom-LinuxTime {
 #>
 	param ([int]$linuxTime)
 	[datetime] $linuxStartTime = [datetime]::ParseExact("1970-01-01 00:00:00","yyyy-MM-dd HH:mm:ss",$null)
-	Return $linuxStartTime.AddSeconds($linuxTime)
+	Return $linuxStartTime.AddSeconds($linuxTime + (Get-TimeZone).BaseUtcOffset.TotalSeconds)
 }
 
 function ConvertTo-LinuxTime {
@@ -806,6 +806,7 @@ function ConvertTo-LinuxTime {
 			[Int]
 	#>
 		param ([datetime]$datetime)
+		$datetime = $datetime.AddMinutes(-1 * (Get-TimeZone).BaseUtcOffset.TotalMinutes)
 		[datetime] $linuxStartTime = [datetime]::ParseExact("1970-01-01 00:00:00","yyyy-MM-dd HH:mm:ss",$null)
 		[int] $linuxTime = ($datetime - $linuxStartTime).TotalSeconds
 		Return $linuxTime
