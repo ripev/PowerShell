@@ -782,6 +782,37 @@ function Clear-Spaces {
 	Return $($InputObject -replace "\s+$","" -replace "^\s+","")
 }
 
-Set-Alias -name glf Get-LockedFileProcess
-Set-Alias -name grep Select-ColorString
-Set-Alias -name maaf Get-MAAFunctions
+function ConvertFrom-LinuxTime {
+<#
+	.Synopsis
+		Convert from linux time
+	.Inputs
+		[Int]
+	.Outputs
+		[datetime]
+#>
+	param ([int]$linuxTime)
+	[datetime] $linuxStartTime = [datetime]::ParseExact("1970-01-01 00:00:00","yyyy-MM-dd HH:mm:ss",$null)
+	Return $linuxStartTime.AddSeconds($linuxTime)
+}
+
+function ConvertTo-LinuxTime {
+	<#
+		.Synopsis
+			Convert to linux time
+		.Inputs
+			[datetime]
+		.Outputs
+			[Int]
+	#>
+		param ([datetime]$datetime)
+		[datetime] $linuxStartTime = [datetime]::ParseExact("1970-01-01 00:00:00","yyyy-MM-dd HH:mm:ss",$null)
+		[int] $linuxTime = ($datetime - $linuxStartTime).TotalSeconds
+		Return $linuxTime
+	}
+
+Set-Alias -Name cflt ConvertFrom-LinuxTime
+Set-Alias -Name ctlt ConvertTo-LinuxTime
+Set-Alias -Name glf  Get-LockedFileProcess
+Set-Alias -Name grep Select-ColorString
+Set-Alias -Name maaf Get-MAAFunctions
