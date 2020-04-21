@@ -834,33 +834,6 @@ public class ISOFile
 	}
 }
 
-function Get-Uptime {
-<#
-	.SYNOPSIS
-		Get pretty uptime via WMI
-#>
-	Get-CimInstance -ClassName win32_operatingsystem | `
-	Select-Object @{n="ComputerName";e={$_.CSName}},LastBootUpTime,`
-	@{n="Uptime";e={
-			$Uptime=$_.LocalDateTime-$_.LastBootUpTime;`
-			if ($Uptime.Days -gt 0) {$OutputString="$($Uptime.Days) days, "};`
-			$OutputString+="$($Uptime.Hours) hours, $($Uptime.Minutes) minutes";`
-			$OutputString
-		}
-	}
-}
-
-function Get-FilesDirectory ($path) {
-<#
-	.Synopsis
-		Returns folder of file
-	.Description
-		Returns folder of file
-#>
-	[System.IO.Path]::GetDirectoryName( $path )
-
-}
-
 function ConvertTo-Base64 {
 <#
 	.Synopsis
@@ -930,3 +903,4 @@ Set-Alias -name cs Capture-Screen
 Set-Alias -name icc Invoke-ComDepCommand
 Set-Alias -name maac Get-MAACommands
 Set-Alias -name maav Get-MAAPSModuleVerions
+Set-Alias -name ssl Test-SSL
