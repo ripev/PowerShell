@@ -32,6 +32,10 @@
 	}
 
 Function Get-LoggedOnUser {
+<#
+	.SYNOPSIS
+		Get list of logget users
+#>
 	Param ([Parameter(Mandatory=$false,Position=0)][string] $computername = "localhost")
 
 	$regexa = '.+Domain="(.+)",Name="(.+)"$'
@@ -121,6 +125,9 @@ Function Output {
 Function Test-Admin {
 <#
 	.SYNOPSIS
+		Checko elevated execution
+
+	.DESCRIPTION
 		Return false if script rinning without elevated admin permissions
 
 	.LINK
@@ -134,8 +141,10 @@ Function Test-Admin {
 Function Invoke-SQLCustomScript {
 <#
 	.SYNOPSIS
-		Sql script without installing Management Studio with integrated (windows) auth
+		Native mssql scripting
 
+	.DESCRIPTION
+		Sql script without installing Management Studio with integrated (windows) auth
 	.PARAMETER SQLInstance
 		SQL server adress
 
@@ -241,6 +250,9 @@ Function Invoke-SQLCustomScript {
 Function New-CustomGuid {
 <#
 	.SYNOPSIS
+		New-GUID like (if not present)
+
+	.DESCRIPTION
 		Generates GUID on system without New-GUID commandlet
 
 	.LINK
@@ -305,6 +317,10 @@ Function Test-Port {
 }
 
 function Test-PortAvailable ([string]$hostname,[int]$port,[int]$timeout) {
+<#
+	.SYNOPSIS
+		Check port available
+#>
 	$client = New-Object System.Net.Sockets.TcpClient
 	$null = $client.BeginConnect($hostname,$port,$null,$null)
 	Start-Sleep -milliseconds $timeOut
@@ -547,6 +563,8 @@ function Get-LockedFileProcess {
 function Select-ColorString {
 <#
 	.SYNOPSIS
+		Find like grep with color
+	.DESCRIPTION
 		Find the matches in a given content by the pattern and write the matches in color like grep
 	.NOTES
 		inspired by: https://ridicurious.com/2018/03/14/highlight-words-in-powershell-console/
@@ -746,6 +764,10 @@ function Get-Factorial ([int]$n) {
 }
 
 function Set-ColorExpressionOutput {
+<#
+	.SYNOPSIS
+		Colorize expression output
+#>
     # desription https://stackoverflow.com/questions/20705102/how-to-colorise-powershell-output-of-format-table
     # colors https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#span-idtextformattingspanspan-idtextformattingspanspan-idtextformattingspantext-formatting
 	param (
