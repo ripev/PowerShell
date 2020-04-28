@@ -848,7 +848,7 @@ function Send-MSTeamsWebHook {
       [string] $messageTitle,
     [Parameter(Mandatory=$true,Position=2)]
 			[string] $messageBody,
-		[Parameter(Position=3)]
+		[Parameter()]
 			[ValidateSet(
 				"Blue",
 				"Green",
@@ -858,7 +858,9 @@ function Send-MSTeamsWebHook {
 				"Magenta",
 				"GitLabMain"
 			)]
-      [string] $messageColor
+			[string] $messageColor,
+		[Parameter()]
+			[array] $urls
 	)
 
 	[string] $messageColorHex = "000000"
@@ -872,13 +874,31 @@ function Send-MSTeamsWebHook {
 		"GitLabMain" {$messageColorHex="A62E21";break}
 	}
 
-  $body = ConvertTo-Json @{
-    "@type"      = "MessageCard"
-    "@context"   = "https://schema.org/extensions"
-    "themeColor" = $messageColorHex
-    "title"      = $messageTitle
-    "text"       = $messageBody
+	$body = [ordered]@{
+		"@type"      = "MessageCard"
+		"@context"   = "https://schema.org/extensions"
+		"themeColor" = $messageColorHex
+		"title"      = $messageTitle
+		"summary"    = $messageBody
+		"sections" = [array]@{
+			"text" = $messageBody
+		}
 	}
+	if ($urls) {
+		[array] $potentialActions = $null;
+		foreach ($url in $urls) {
+			$potentialActions += @{
+				"@type"   = "OpenUri"
+				"name"    = $url.name
+				"targets" = [array]@{
+					"os"    = "default"
+					"uri"   = $url.uri
+				}
+			}
+		}
+		$body.Add("potentialAction", $potentialActions)
+	}
+	$body = $body | ConvertTo-Json -Depth 4
 	Try {
 		$null = Invoke-WebRequest -UseBasicParsing -Uri $hookUri -Body $body -Method Post -ContentType "application/json; charset=utf-8"
 		Return $true
