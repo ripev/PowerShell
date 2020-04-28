@@ -830,10 +830,70 @@ function ConvertTo-LinuxTime {
 		param ([datetime]$datetime)
 		$linuxTime = [int][double]::Parse((Get-Date -Date $datetime -UFormat %s))
 		Return $linuxTime
+}
+
+function Send-MSTeamsWebHook {
+	<#
+		.Synopsis
+			Send message to MSTeams group
+		.Description
+			Send message via WebHook of MSTeams's group (webhook should be anabled for group)
+		.Outputs
+			[Bool]
+	#>
+  param(
+    [Parameter(Mandatory=$true,Position=0)]
+      [string] $hookUri,
+    [Parameter(Mandatory=$true,Position=1)]
+      [string] $messageTitle,
+    [Parameter(Mandatory=$true,Position=2)]
+			[string] $messageBody,
+		[Parameter(Position=3)]
+			[ValidateSet(
+				"Blue",
+				"Green",
+				"Red",
+				"Yellow",
+				"Cyan",
+				"Magenta",
+				"GitLabMain"
+			)]
+      [string] $messageColor
+	)
+
+	[string] $messageColorHex = "000000"
+	switch ($messageColor) {
+		"Blue"       {$messageColorHex="0000FF";break}
+		"Green"      {$messageColorHex="00FF00";break}
+		"Red"        {$messageColorHex="FF0000";break}
+		"Yellow"     {$messageColorHex="FFFF00";break}
+		"Cyan"       {$messageColorHex="00FFFF";break}
+		"Magenta"    {$messageColorHex="FF00FF";break}
+		"GitLabMain" {$messageColorHex="A62E21";break}
 	}
+
+  $body = ConvertTo-Json @{
+    "@type"      = "MessageCard"
+    "@context"   = "https://schema.org/extensions"
+    "themeColor" = $messageColorHex
+    "title"      = $messageTitle
+    "text"       = $messageBody
+	}
+	Try {
+		$null = Invoke-WebRequest -UseBasicParsing -Uri $hookUri -Body $body -Method Post -ContentType "application/json; charset=utf-8"
+		Return $true
+	} Catch {
+		[string] $outputError = "Some errors sending MSTeams web-hook..."
+		if ($Error[0].InvocationInfo.Line) {$outputError += "`nCommand: $($Error[0].InvocationInfo.Line)"}
+		if ($Error[0].Exception.Message)   {$outputError += "`nError: $($Error[0].Exception.Message)"}
+		Write-Host $outputError
+		Return $false
+	}
+}
 
 Set-Alias -Name cflt ConvertFrom-LinuxTime
 Set-Alias -Name ctlt ConvertTo-LinuxTime
 Set-Alias -Name glf  Get-LockedFileProcess
 Set-Alias -Name grep Select-ColorString
 Set-Alias -Name maaf Get-MAAFunctions
+Set-Alias -Name mst  Send-MSTeamsWebHook
