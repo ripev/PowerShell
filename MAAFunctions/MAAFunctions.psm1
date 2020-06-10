@@ -856,7 +856,8 @@ function Send-MSTeamsWebHook {
 				"Yellow",
 				"Cyan",
 				"Magenta",
-				"GitLabMain"
+				"GitLabMain",
+				"GoldOpport"
 			)]
 			[string] $messageColor,
 		[Parameter()]
@@ -872,6 +873,7 @@ function Send-MSTeamsWebHook {
 		"Cyan"       {$messageColorHex="00FFFF";break}
 		"Magenta"    {$messageColorHex="FF00FF";break}
 		"GitLabMain" {$messageColorHex="A62E21";break}
+		"GoldOpport" {$messageColorHex="39978C";break}
 	}
 
 	$body = [ordered]@{
