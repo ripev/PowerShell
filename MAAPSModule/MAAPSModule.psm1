@@ -898,6 +898,42 @@ function Capture-Screen
 	$bitmap.Save($File)
 }
 
+function Send-RootMSTeamsWebHook {
+	<#
+		.Synopsis
+			Send message to MSTeams
+		.Example
+			Send-MSTeamsWebHook -hookUri $msTeamsHookForGitlab -messageTitle $messageTitle -messageBody $messageBody -messageColor GitLabMain
+			Sends message with title $messageTitle and body $messageBody to group $msTeamsHookForGitlab
+	#>
+  param(
+    [Parameter(Mandatory=$true,Position=0)]
+      [string]$hookUri,
+    [Parameter(Mandatory=$true,Position=1)]
+      $messageTitle,
+    [Parameter(Mandatory=$true,Position=2)]
+      $messageBody,
+    [Parameter(Position=3)]
+      [ValidateSet("GitLabMain","GoldOpportunity")]
+      [string] $messageColor
+  )
+  [string] $messageColorHex = "000000"
+  switch ($messageColor) {
+    "GitLabMain" {$messageColorHex="A62E21"}
+		"GoldOpportunity" {$messageColorHex="39978C"}
+  }
+  $body = ConvertTo-Json @{
+    "@type"      = "MessageCard"
+    "@context"   = "https://schema.org/extensions"
+    "themeColor" = $messageColorHex
+    "title"      = $messageTitle
+    "text"       = $messageBody
+  }
+  $request = Invoke-WebRequest -UseBasicParsing -Uri $hookUri -Body $body -Method Post -ContentType "application/json; charset=utf-8"
+  Return $request.StatusCode.ToString().Trim()
+}
+
+
 Set-Alias -name cr Connect-Remote
 Set-Alias -name cs Capture-Screen
 Set-Alias -name icc Invoke-ComDepCommand
