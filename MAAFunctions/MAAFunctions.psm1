@@ -833,6 +833,7 @@ function ConvertTo-LinuxTime {
 }
 
 function Send-MSTeamsWebHook {
+[cmdletbinding(DefaultParameterSetName="SimpleMessage")]
 	<#
 		.Synopsis
 			Send message to MSTeams group
@@ -846,8 +847,10 @@ function Send-MSTeamsWebHook {
       [string] $hookUri,
     [Parameter(Mandatory=$true,Position=1)]
       [string] $messageTitle,
-    [Parameter(Mandatory=$true,Position=2)]
+    [Parameter(Mandatory=$true,Position=2,ParameterSetName="SimpleMessage")]
 			[string] $messageBody,
+		[Parameter(Mandatory=$true,Position=2,ParameterSetName="PSCustomObject")]
+			[array] $psCustomObjectArray,
 		[Parameter()]
 			[ValidateSet(
 				"Blue",
@@ -864,6 +867,29 @@ function Send-MSTeamsWebHook {
 			[array] $urls
 	)
 
+	function Get-ArrayOfCustomObjectsToMSTeamsSections {
+		param(
+			[Parameter(Mandatory=$true,Position=0)]
+				[array] $psCustomObjectsArray
+		)
+		[array] $sectionsOutput = $null
+		foreach ($objectItem in $psCustomObjectsArray) {
+			[array] $facts = $null
+			foreach ($item in $objectItem.PSObject.Properties) {
+				$fact = [PSCustomObject] [ordered] @{
+					"name" = $item.Name
+					"value" = $item.value
+				}
+				$facts += $fact
+			}
+			$sectionsOutput += [PSCustomObject] [ordered] @{
+				startGroup = $true
+				facts      = $facts
+			}
+		}
+		return $sectionsOutput
+	}
+
 	[string] $messageColorHex = "000000"
 	switch ($messageColor) {
 		"Blue"       {$messageColorHex="0000FF";break}
@@ -876,14 +902,19 @@ function Send-MSTeamsWebHook {
 		"GoldOpport" {$messageColorHex="39978C";break}
 	}
 
-	$body = [ordered]@{
+	$body = [PSCustomObject] [ordered]@{
 		"@type"      = "MessageCard"
 		"@context"   = "https://schema.org/extensions"
 		"themeColor" = $messageColorHex
 		"title"      = $messageTitle
-		"summary"    = $messageBody
-		"sections" = [array]@{
-			"text" = $messageBody
+		"summary"    = $( (New-Guid).Guid )
+	}
+	if ($psCustomObjectArray) {
+		[array] $sectionObjectWithFacts = Get-ArrayOfCustomObjectsToMSTeamsSections $psCustomObjectArray
+		if ($sectionObjectWithFacts.Length -gt 0) {
+			$body | Add-Member NoteProperty -Name "sections" -Value $sectionObjectWithFacts
+		} else {
+			$body | Add-Member NoteProperty -Name "sections" -Value $([array]@{"text" = $messageBody})
 		}
 	}
 	if ($urls) {
@@ -906,8 +937,10 @@ function Send-MSTeamsWebHook {
 		Return $true
 	} Catch {
 		[string] $outputError = "Some errors sending MSTeams web-hook..."
-		if ($Error[0].InvocationInfo.Line) {$outputError += "`nCommand: $($Error[0].InvocationInfo.Line)"}
-		if ($Error[0].Exception.Message)   {$outputError += "`nError: $($Error[0].Exception.Message)"}
+		if ($Global:Error[0].InvocationInfo.Line) {$outputError += "`nCommand: $($Global:Error[0].InvocationInfo.Line)"}
+		if ($Global:Error[0].Exception.Message)   {$outputError += "`nError: $($Global:Error[0].Exception.Message)"}
+		if ($Global:Error[0].ErrorDetails)        {$outputError += "`nError details: $($Global:Error[0].ErrorDetails)"}
+		if ($Global:Error[0].ScriptStackTrace)    {$outputError += "`nScript stack trace: $($Global:Error[0].ScriptStackTrace)"}
 		Write-Host $outputError
 		Return $false
 	}
