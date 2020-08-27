@@ -1027,6 +1027,24 @@ function Invoke-FlashWindow {
     }
   }
 }
+function Show-CustomError {
+<#
+  .Synopsis
+    Show detailed information about error
+#>
+  if ($Global:Error[0].InvocationInfo.Line)       {Write-Host "Error command:`t$( ($Global:Error[0].InvocationInfo.Line).Trim() )"}
+  if ($Global:Error[0].Exception.Message)         {Write-Host "Error message:`t$($Global:Error[0].Exception.Message)"}
+  [bool] $showScriptName = $false
+  if ($Global:Error[0].InvocationInfo.ScriptName) {
+    [string] $scriptName = $Global:Error[0].InvocationInfo.ScriptName
+    $showScriptName = $true
+  }
+  if ($Global:Error[0].InvocationInfo.ScriptLineNumber) {
+    $scriptName += ":$($Global:Error[0].InvocationInfo.ScriptLineNumber)"
+  }
+  if ($showScriptName)                            {Write-Host "Script name:`t${scriptName}"}
+  if ($Global:Error[0].ErrorDetails)              {Write-Host "Error details:`t$($Global:Error[0].ErrorDetails)"}
+}
 
 Set-Alias -Name cflt ConvertFrom-LinuxTime
 Set-Alias -Name ctlt ConvertTo-LinuxTime
