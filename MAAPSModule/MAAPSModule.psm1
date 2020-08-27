@@ -142,7 +142,7 @@ Function Update-MAAPSModule {
 		}
 		catch {
 			Write-Host "Copy error:" -ForegroundColor DarkGray
-			Write-Host "$($Error.Exception)" -ForegroundColor Red
+			Show-CustomError
 		}
 	}
 }
@@ -296,7 +296,7 @@ Function Get-SQLDbs {
 				}
 			}
 		} Catch {
-			Write-Host "Error with executing SQL script. Error details:`n$($Error[0])" -ForegroundColor Red
+			Show-CustomError
 			Break
 		}
 		$OutputItem = New-Object Object
