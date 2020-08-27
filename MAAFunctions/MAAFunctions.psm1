@@ -218,7 +218,7 @@ Function Invoke-SQLCustomScript {
       $DataSet.Tables[0]
     } Catch {
       Set-Location $StartLocation
-      Write-Error $_.Exception.Message.Split(":")[1]
+      Show-CustomError
     }
   } else { Write-Warning "Connection to '$($SQLInstance)' cannot be established." }
   #endregion testing sqlserver connection available
@@ -906,12 +906,8 @@ function Send-MSTeamsWebHook {
     $null = Invoke-WebRequest -UseBasicParsing -Uri $hookUri -Body $body -Method Post -ContentType "application/json; charset=utf-8"
     Return $true
   } Catch {
-    [string] $outputError = "Some errors sending MSTeams web-hook..."
-    if ($Global:Error[0].InvocationInfo.Line) {$outputError += "`nCommand: $($Global:Error[0].InvocationInfo.Line)"}
-    if ($Global:Error[0].Exception.Message)   {$outputError += "`nError: $($Global:Error[0].Exception.Message)"}
-    if ($Global:Error[0].ErrorDetails)        {$outputError += "`nError details: $($Global:Error[0].ErrorDetails)"}
-    if ($Global:Error[0].ScriptStackTrace)    {$outputError += "`nScript stack trace: $($Global:Error[0].ScriptStackTrace)"}
-    Write-Host $outputError
+    Write-Host = "Some errors sending MSTeams web-hook..."
+    Show-CustomError
     Return $false
   }
 }
