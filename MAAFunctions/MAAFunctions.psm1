@@ -927,7 +927,12 @@ function Send-MSTeamsWebHook {
 			$body | Add-Member NoteProperty -Name "sections" -Value $sectionObjectWithFacts
 		}
 	}	else {
-		$body | Add-Member NoteProperty -Name "sections" -Value $([array]@{"text" = $messageBody})
+		[array] $summary = $null
+		$summaryItem = [PSCustomObject]@{
+			text = $messageBody
+		}
+		[array] $summary += $summaryItem
+		$body | Add-Member NoteProperty -Name "sections" -Value $summary
 	}
 	if ($urls) {
 		[array] $potentialActions = $null;
