@@ -839,8 +839,20 @@ function Send-MSTeamsWebHook {
 			Send message to MSTeams group
 		.Description
 			Send message via WebHook of MSTeams's group (webhook should be anabled for group)
+		.Parameter hookUri
+			MSTeams Incoming webhook uri (https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using#setting-up-a-custom-incoming-webhook)
+		.Parameter messageTitle
+			Subject of message
+		.Parameter messageBody
+			Simple message body
+		.Parameter psCustomObjectArray
+			Array of PSCustomObjects that sends as message cards
+		.Parameter messageColor
+			Color for message
+		.Parameter urls
+			Receive array of urls (pscustomobject with name and uri) and attach as buttons to message
 		.Outputs
-			[Bool]
+			[System.Boolean]
 	#>
   param(
     [Parameter(Mandatory=$true,Position=0)]
@@ -914,7 +926,12 @@ function Send-MSTeamsWebHook {
 		if ($sectionObjectWithFacts.Length -gt 0) {
 			$body | Add-Member NoteProperty -Name "sections" -Value $sectionObjectWithFacts
 		} else {
-			$body | Add-Member NoteProperty -Name "sections" -Value $([array]@{"text" = $messageBody})
+			[array] $summary = $null
+			$summaryItem = [PSCustomObject]@{
+				text = $messageBody
+			}
+			[array] $summary += $summaryItem
+			$body | Add-Member NoteProperty -Name "sections" -Value $summary
 		}
 	}
 	if ($urls) {
