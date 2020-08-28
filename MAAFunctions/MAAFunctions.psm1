@@ -803,6 +803,8 @@ function Send-MSTeamsWebHook {
       Simple message body
     .Parameter psCustomObjectArray
       Array of PSCustomObjects that sends as message cards
+    .Parameter psCustomObject
+      Custom body to send
     .Parameter messageColor
       Color for message
     .Parameter urls
@@ -817,8 +819,10 @@ function Send-MSTeamsWebHook {
       [string] $messageTitle,
     [Parameter(Mandatory=$true,Position=2,ParameterSetName="SimpleMessage")]
       [string] $messageBody,
-    [Parameter(Mandatory=$true,Position=2,ParameterSetName="PSCustomObject")]
+    [Parameter(Mandatory=$true,Position=2,ParameterSetName="psCustomObjectArray")]
       [array] $psCustomObjectArray,
+    [Parameter(Mandatory=$true,Position=2,ParameterSetName="PSCustomObject")]
+      [PSCustomObject] $psCustomObject,
     [Parameter()]
       [ValidateSet(
         "Blue",
@@ -879,7 +883,9 @@ function Send-MSTeamsWebHook {
     if ($sectionObjectWithFacts.Length -gt 0) {
       $body | Add-Member NoteProperty -Name "sections" -Value $sectionObjectWithFacts
     }
-  }  else {
+  } elseif ($psCustomObject) {
+    $body = $psCustomObject
+  } else {
     [array] $summary = $null
     $summaryItem = [PSCustomObject]@{
       text = $messageBody
@@ -901,7 +907,7 @@ function Send-MSTeamsWebHook {
     }
     $body.Add("potentialAction", $potentialActions)
   }
-  $body = $body | ConvertTo-Json -Depth 4
+  $body = $body | ConvertTo-Json -Depth 6
   Try {
     $null = Invoke-WebRequest -UseBasicParsing -Uri $hookUri -Body $body -Method Post -ContentType "application/json; charset=utf-8"
     Return $true
