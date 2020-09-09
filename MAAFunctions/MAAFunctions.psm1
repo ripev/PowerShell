@@ -1,4 +1,18 @@
-﻿Function Get-MAAFunctions {
+﻿#region colors
+if ($host.Version.Major -ge 5 -and -not ($env:JENKINS_HOME) ) {
+  $Global:esc="$([char]27)"
+  $Global:TXT_YELLOW="$($Global:esc)[33m"
+  $Global:TXT_MAGENTA="$($Global:esc)[35m"
+  $Global:TXT_RED="$($Global:esc)[31m"
+  $Global:TXT_CLEAR="$($Global:esc)[0m"
+} else {
+  $Global:TXT_YELLOW=""
+  $Global:TXT_MAGENTA=""
+  $Global:TXT_RED=""
+  $Global:TXT_CLEAR=""
+}
+#endregion
+Function Get-MAAFunctions {
 <#
   .SYNOPSIS
     Show MAA functions with aliases
@@ -1034,8 +1048,8 @@ function Show-CustomError {
   .Synopsis
     Show detailed information about error
 #>
-  if ($Global:Error[0].InvocationInfo.Line)       {Write-Host "Error command:`t$( ($Global:Error[0].InvocationInfo.Line).Trim() )"}
-  if ($Global:Error[0].Exception.Message)         {Write-Host "Error message:`t$($Global:Error[0].Exception.Message)"}
+  if ($Global:Error[0].InvocationInfo.Line)       {Write-Host "$($Global:TXT_RED)Error command:$($Global:TXT_CLEAR)`t$( ($Global:Error[0].InvocationInfo.Line).Trim() )"}
+  if ($Global:Error[0].Exception.Message)         {Write-Host "$($Global:TXT_RED)Error message:$($Global:TXT_CLEAR)`t$($Global:Error[0].Exception.Message)"}
   [bool] $showScriptName = $false
   if ($Global:Error[0].InvocationInfo.ScriptName) {
     [string] $scriptName = $Global:Error[0].InvocationInfo.ScriptName
@@ -1044,8 +1058,11 @@ function Show-CustomError {
   if ($Global:Error[0].InvocationInfo.ScriptLineNumber) {
     $scriptName += ":$($Global:Error[0].InvocationInfo.ScriptLineNumber)"
   }
-  if ($showScriptName)                            {Write-Host "Script name:`t${scriptName}"}
-  if ($Global:Error[0].ErrorDetails)              {Write-Host "Error details:`t$($Global:Error[0].ErrorDetails)"}
+  if ($Global:Error[0].InvocationInfo.OffsetInLine){
+    $scriptName += " char:$($Global:Error[0].InvocationInfo.OffsetInLine)"
+  }
+  if ($showScriptName)                            {Write-Host "$($Global:TXT_RED)Script name:$($Global:TXT_CLEAR)`t${scriptName}"}
+  if ($Global:Error[0].ErrorDetails)              {Write-Host "$($Global:TXT_RED)Error details:$($Global:TXT_CLEAR)`t$($Global:Error[0].ErrorDetails)"}
 }
 
 Set-Alias -Name cflt ConvertFrom-LinuxTime
