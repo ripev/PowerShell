@@ -9,6 +9,8 @@ Function Get-MAAPSModuleInternetVersion {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
+	#TLS
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 	$MAAPSModulePSD1urlDownloaded = (new-object net.webclient).DownloadString($MAAPSModulePSD1url)
 	$MAAPSModulePSM1urlDownloaded = (new-object net.webclient).DownloadString($MAAPSModulePSM1url)
 	$RandomNameString = Get-RandomName
@@ -155,6 +157,8 @@ Function Update-MAAFunctions {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
+	#TLS
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 	Invoke-Expression ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/ripev/PowerShell/master/MAAFunctions/MAAFunctionsInstall.ps1'))
 }
 
@@ -469,7 +473,7 @@ Function Invoke-ComDepCommand {
 	Param(
 		[Parameter(Mandatory=$true,Position=0)] [String] $Command
 	)
-	$srvs = "spb-st-dev01","spb-pw-com1","spb-s-comdep","spb-s-kob1","pw-pos-srv1","pw-pos-srv2","pw-fin3"
+	$srvs = "spb-st-dev01","spb-pw-com1","spb-s-comdep","spb-s-kob1","pw-pos-srv1","pw-pos-srv2","pw-fin3","pw-workki02"
 	$JobItems=@();
 	$JobDatePreffix = (Get-Date).ToString("yyyy-MM-dd_HH-mm-ss")
 	$i=30;Write-Host ""("+"*$i)"`n  Starting jobs on all servers`n"("+"*$i) -ForegroundColor Cyan
@@ -599,6 +603,8 @@ Function Get-File {
 	if ($bits) {
 		Start-BitsTransfer $url -DisplayName "Downloading" -Description $url
 	} else {
+		#TLS
+		[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 		(new-object net.webclient).DownloadFile("$url","$file")
 	}
 }
