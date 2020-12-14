@@ -1065,6 +1065,83 @@ function Show-CustomError {
   if ($Global:Error[0].ErrorDetails)              {Write-Host "$($Global:TXT_RED)Error details:$($Global:TXT_CLEAR)`t$($Global:Error[0].ErrorDetails)"}
 }
 
+function Get-IPsArray {
+  <#
+    .Synopsis
+      IP calculator
+    .Description
+      Return hastable with IPs, Mask and other network info, by IP and mask
+    .Parameter inputIpAddress
+      IP address string
+    .Parameter maskLength
+      Mask length INT
+    .Parameter inputIpAddressWithMask
+      IP/mask length
+    .EXAMPLE
+      Get-IPsArray "192.168.100.15" 27
+      Name                           Value
+      ----                           -----
+      availableIpCount               30
+      availableIps                   192.168.100.1 - 192.168.100.30
+      networkAddr                    192.168.100.0
+      availableIpsArray              {192.168.100.1, 192.168.100.2, 192.168.100.3, 192.168.100.4...}
+      broadcastAddr                  192.168.100.31
+    .INPUTS
+      [System.TimeSpan]
+    .OUTPUTS
+      [Hashtable]
+    .NOTES
+      NAME timeDurationOutput
+      AUTHOR: Andrey Makovetsky (andrey@makovetsky.me)
+      LASTEDIT: 2018-06-06
+  #>
+  [CmdletBinding(DefaultParameterSetName="ipAndMask")]
+  param (
+    [Parameter(Mandatory=$true,Position=0,HelpMessage="IP address",ParameterSetName="ipAndMask")]
+      [ValidatePattern("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")]
+      [string] $inputIpAddress,
+    [Parameter(Mandatory=$false,Position=1,ParameterSetName="ipAndMask")]
+      [ValidateRange(1,32)]
+      [int] $maskLenght = 28,
+    [Parameter(Mandatory=$true,Position=0,HelpMessage="IP address with mask",ParameterSetName="ipWithMask")]
+      [ValidatePattern("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/([1-9]|[1-2][\d]|3[0-2])$")]
+      [string] $inputIpAddressWithMask
+  )
+  #TODO: count mask length by convert to binary numbering
+  [hashtable] $addressesInMask = [ordered] @{
+    24 = 256
+    25 = 128
+    26 = 64
+    27 = 32
+    28 = 16
+    29 = 8
+    30 = 4
+    31 = 2
+    32 = 0
+  }
+  if ($maskLenght -ge 24) {
+    if ($inputIpAddress -match "^((\d{1,3}\.){3})(\d{1,3})$") {
+      [string] $beginingAddressString = $Matches[1]
+      [int] $lastOctet = $Matches[3]
+    }
+    [int] $networkMask = $lastOctet - $lastOctet % $addressesInMask.$maskLenght
+  } elseif ($maskLenght -ge 16 -and $maskLenght -lt 24) {
+  } elseif ($maskLenght -ge 8  -and $maskLenght -lt 16) {
+  } else {}
+  [string[]] $availableIps = $null;
+  for ($i = $networkMask + 1; $i -le $networkMask + $addressesInMask.$maskLenght - 2;$i++) {
+    $availableIps += "${beginingAddressString}${i}"
+  }
+  [hashtable] $outputIPdata = [ordered]@{
+    availableIpCount = ($addressesInMask.$maskLenght - 2)
+    availableIps = "${beginingAddressString}$($networkMask + 1) - ${beginingAddressString}$($networkMask + $addressesInMask.$maskLenght - 2)"
+    availableIpsArray = $availableIps
+    networkAddr = "${beginingAddressString}${networkMask}"
+    broadcastAddr = "${beginingAddressString}$($networkMask + $addressesInMask.$maskLenght - 1)"
+  }
+  return $outputIPdata
+}
+
 Set-Alias -Name cflt ConvertFrom-LinuxTime
 Set-Alias -Name ctlt ConvertTo-LinuxTime
 Set-Alias -Name flash Invoke-FlashWindow
