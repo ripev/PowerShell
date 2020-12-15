@@ -861,8 +861,8 @@ function Send-MSTeamsWebHook {
     foreach ($objectItem in $psCustomObjectsArray) {
       [array] $facts = $null
       foreach ($item in $objectItem.PSObject.Properties) {
-        $name = $item.Name -replace "_","\_"
-        $value = $item.value -replace "_","\_"
+        $name = $item.Name -replace '\\','\\' -replace "_","\_"
+        $value = $item.value -replace '\\','\\' -replace "_","\_"
         $fact = [PSCustomObject] [ordered] @{
           "name" = $name
           "value" = $value
@@ -902,7 +902,7 @@ function Send-MSTeamsWebHook {
   } elseif ($psCustomObject) {
     $body = $psCustomObject
   } else {
-    $messageBody = $messageBody -replace "_","\_"
+    $messageBody = $messageBody -replace '\\','\\' -replace "_","\_"
     [array] $summary = $null
     $summaryItem = [PSCustomObject]@{
       text = $messageBody
