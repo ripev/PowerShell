@@ -155,6 +155,7 @@ Function Invoke-SQLCustomScript {
   .LINK
     https://github.com/ripev/PowerShell/
 #>
+  [CmdletBinding()]
   Param (
     [Parameter(Mandatory=$true,Position=0)]
       [String] $SQLInstance,
@@ -233,6 +234,7 @@ Function Invoke-SQLCustomScript {
     } Catch {
       Set-Location $StartLocation
       Show-CustomError
+      if ($ErrorActionPreference -eq "Stop") { Exit 1 }
     }
   } else { Write-Warning "Connection to '$($SQLInstance)' cannot be established." }
   #endregion testing sqlserver connection available
