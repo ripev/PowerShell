@@ -910,3 +910,5 @@ Set-Alias -name icc Invoke-ComDepCommand
 Set-Alias -name maac Get-MAACommands
 Set-Alias -name maav Get-MAAPSModuleVerions
 Set-Alias -name ssl Test-SSL
+Set-Alias -name cfb ConvertFrom-Base64
+Set-Alias -name ctb ConvertTo-Base64
