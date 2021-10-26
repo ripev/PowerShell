@@ -473,7 +473,7 @@ Function Invoke-ComDepCommand {
 	Param(
 		[Parameter(Mandatory=$true,Position=0)] [String] $Command
 	)
-	$srvs = "tw-com1","spb-pw-com1","spb-s-comdep","pw-com2","pw-pos-srv1","pw-pos-srv2","pw-fin3","pw-workki02"
+	$srvs = "tw-com1","spb-pw-com1","spb-s-comdep","pw-com2","pw-pos-srv1","pw-pos-srv2","pw-fin3","pw-fin4","pw-workki02"
 	$JobItems=@();
 	$JobDatePreffix = (Get-Date).ToString("yyyy-MM-dd_HH-mm-ss")
 	$i=30;Write-Host ""("+"*$i)"`n  Starting jobs on all servers`n"("+"*$i) -ForegroundColor Cyan
