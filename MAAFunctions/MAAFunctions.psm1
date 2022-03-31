@@ -928,6 +928,7 @@ function Send-MSTeamsWebHook {
   }
   $body = $body | ConvertTo-Json -Depth 6
   Try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     $null = Invoke-WebRequest -UseBasicParsing -Uri $hookUri -Body $body -Method Post -ContentType "application/json; charset=utf-8"
     Return $true
   } Catch {
