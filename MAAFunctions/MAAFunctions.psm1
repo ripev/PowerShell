@@ -1155,3 +1155,4 @@ Set-Alias -Name glf  Get-LockedFileProcess
 Set-Alias -Name grep Select-ColorString
 Set-Alias -Name maaf Get-MAAFunctions
 Set-Alias -Name mst  Send-MSTeamsWebHook
+Set-Alias -Name ipcalc Get-IPsArray
