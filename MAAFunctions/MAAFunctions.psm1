@@ -1148,6 +1148,77 @@ function Get-IPsArray {
   return $outputIPdata
 }
 
+function New-MultiThreadJob {
+<#
+.SYNOPSIS
+  start job in multiply threads
+.DESCRIPTION
+  start multijob with items in array
+.PARAMETER threadCommand
+  scriptblock of command with param($argument)
+.PARAMETER arguments
+  array of arguments for multi-command
+.PARAMETER maxThreads
+  maximum threads number (default 5)
+.EXAMPLE
+  New-MultiThreadJob -threadCommand {param($argument);return $argument} -arguments "1","2","3","4","5" -maxThreads 3
+  1
+  2
+  3
+  4
+  5
+.NOTES
+  NAME New-MultiThreadJob
+  AUTHOR: Andrey Makovetsky (andrey@makovetsky.me)
+  LASTEDIT: 2023-06-20
+#>
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory=$true,Position=0)]
+      [scriptblock] $threadCommand,
+    [Parameter(Mandatory=$true,Position=1)]
+      [array] $arguments,
+    [Parameter(Mandatory=$false,Position=2)]
+      [int] $maxThreads = 5
+  )
+
+  [array] $outputArray     = $null
+  [int] $completedJobCount = 0
+
+  Write-Verbose "preparing runspace"
+  $RunspacePool = [runspacefactory]::CreateRunspacePool(1, $maxThreads)
+  $RunspacePool.Open()
+  $sumulationJobs = @() 
+
+  Write-Verbose "starting all jobs"
+  foreach ($argument in $arguments) {
+    $powershell = [powershell]::Create().AddScript($threadCommand).AddArgument($argument)
+    $powershell.RunspacePool = $RunspacePool
+    $sumulationJobs += New-Object PSObject -Property @{
+      Job = $powershell
+      Result = $powershell.BeginInvoke()
+    }
+  }
+
+  Write-Verbose "waiting all jobs completed"
+  while ($sumulationJobs.Result.IsCompleted -eq $false) {
+    if ( ($sumulationJobs.Result.IsCompleted -eq $true).Count -gt $completedJobCount) {
+      Write-Host "Completed " -NoNewline
+      Write-Host $( ($sumulationJobs.Result.IsCompleted -eq $true).Count ) -ForegroundColor Green -NoNewline
+      Write-Host "/$($sumulationJobs.Count)"
+      $completedJobCount = ($sumulationJobs.Result.IsCompleted -eq $true).Count
+    }
+    Start-Sleep -Seconds 10
+  }
+
+  Write-Verbose "all done, collecting outputs"
+  foreach ($job in $sumulationJobs) {
+    $outputArray += $job.Job.EndInvoke($job.Result)
+  }
+
+  return $outputArray
+}
+
 Set-Alias -Name cflt ConvertFrom-LinuxTime
 Set-Alias -Name ctlt ConvertTo-LinuxTime
 Set-Alias -Name flash Invoke-FlashWindow
@@ -1155,4 +1226,5 @@ Set-Alias -Name glf  Get-LockedFileProcess
 Set-Alias -Name grep Select-ColorString
 Set-Alias -Name maaf Get-MAAFunctions
 Set-Alias -Name mst  Send-MSTeamsWebHook
+Set-Alias -Name nmtj New-MultiThreadJob
 Set-Alias -Name ipcalc Get-IPsArray
