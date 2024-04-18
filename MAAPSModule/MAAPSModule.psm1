@@ -172,12 +172,17 @@ Function Get-StoredCredential {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
-	$CredFilePath = "$($env:USERPROFILE)\.ssh\$($env:USERNAME).cred"
+	[CmdletBinding()]
+	param(
+		[Parameter(Mandatory=$false)]
+			[string]$username = $env:USERNAME
+	)
+	$CredFilePath = "$($env:USERPROFILE)\.ssh\${username}_$($env:COMPUTERNAME).cred"
 	if ((Test-Path $CredFilePath -ErrorAction SilentlyContinue) -eq $false) {
 		Output -str "File with credentials not found at '$($env:USERPROFILE)\.ssh'" -color Red
 		Output -str "You can create credential file with folowing command:" -color Gray
 		Output -str '$Credential = Get-Credential' -color Yellow
-		Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File -PSPath "$($env:USERPROFILE)\.ssh\$($env:USERNAME).cred"'
+		Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File -PSPath "$($env:USERPROFILE)\.ssh\${username}_$($env:COMPUTERNAME).cred"'
 	} else {
 		$CredFile = Get-Item $CredFilePath
 		try {
@@ -187,7 +192,7 @@ Function Get-StoredCredential {
 			Output "Probably file created in other user session." -color Gray
 			Output "Recreate file with following command:" -color Gray
 			Output -str '$Credential = Get-Credential' -color Yellow
-			Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File $($env:USERPROFILE)\.ssh\$($env:USERNAME).cred'
+			Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File $($env:USERPROFILE)\.ssh\${username}_$($env:COMPUTERNAME).cred'
 		}
 	}
 }
@@ -473,7 +478,7 @@ Function Invoke-ComDepCommand {
 	Param(
 		[Parameter(Mandatory=$true,Position=0)] [String] $Command
 	)
-	$srvs = "tw-com1","spb-pw-com1","spb-s-comdep","pw-com2","pw-pos-srv1","pw-pos-srv2","pw-fin3","pw-fin4","pw-workki02"
+	$srvs = "tw-com1","tw-com4","spb-pw-com1","spb-s-comdep","pw-com2","pw-pos-srv1","pw-pos-srv2","pw-fin3","pw-fin4","pw-workki02"
 	$JobItems=@();
 	$JobDatePreffix = (Get-Date).ToString("yyyy-MM-dd_HH-mm-ss")
 	$i=30;Write-Host ""("+"*$i)"`n  Starting jobs on all servers`n"("+"*$i) -ForegroundColor Cyan
