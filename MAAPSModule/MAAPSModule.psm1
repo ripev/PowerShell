@@ -182,17 +182,17 @@ Function Get-StoredCredential {
 		Output -str "File with credentials not found at '$($env:USERPROFILE)\.ssh'" -color Red
 		Output -str "You can create credential file with folowing command:" -color Gray
 		Output -str '$Credential = Get-Credential' -color Yellow
-		Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File -PSPath "$($env:USERPROFILE)\.ssh\${username}_$($env:COMPUTERNAME).cred"'
+		Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File -PSPath "$($env:USERPROFILE)\.ssh\$($Credential.UserName)_$($env:COMPUTERNAME).cred"'
 	} else {
 		$CredFile = Get-Item $CredFilePath
 		try {
 			$PwdSecureString = Get-Content $CredFile | ConvertTo-SecureString -ErrorAction Stop
-			New-Object System.Management.Automation.PSCredential -ArgumentList $($CredFile.BaseName), $PwdSecureString
+			New-Object System.Management.Automation.PSCredential -ArgumentList $($CredFile.BaseName).Split('_')[0], $PwdSecureString
 		} catch {
 			Output "Probably file created in other user session." -color Gray
 			Output "Recreate file with following command:" -color Gray
 			Output -str '$Credential = Get-Credential' -color Yellow
-			Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File $($env:USERPROFILE)\.ssh\${username}_$($env:COMPUTERNAME).cred'
+			Output -str '$Credential.Password | ConvertFrom-SecureString | Out-File $($env:USERPROFILE)\.ssh\$($Credential.UserName)_$($env:COMPUTERNAME).cred'
 		}
 	}
 }
