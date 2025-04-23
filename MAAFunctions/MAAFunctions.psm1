@@ -316,9 +316,9 @@ function Test-PortAvailable ([string]$hostname,[int]$port,[int]$timeout) {
 Function fileSizeOutput {
 <#
   .SYNOPSIS
-    Convert input integer to pretty GB/MB/KB format
+    Convert input integer to pretty TB/GB/MB/KB format
   .DESCRIPTION
-    Returns (convert) size in format #.### GB/MB/KB
+    Returns (convert) size in format #.### TB/GB/MB/KB
   .PARAMETER Size
     Input integer parameter without chars
   .EXAMPLE
@@ -332,15 +332,21 @@ Function fileSizeOutput {
     LASTEDIT: 2018-03-29
 #>
   param ([Parameter (Mandatory=$true,Position=0)]$Size)
-  if ($Size -ge 1073741824) { # check that size in GB
-    ($($Size)/1073741824).ToString("#.###") + " GB"
-  } else {
-    if ($Size -ge 1048576) { # check that size in MB
-      ($($Size)/1048576).ToString("#.###") + " MB"
-    } else { # check that size in KB
-      ($($Size)/1024).ToString("#.###") + " KB"
-    }
+  $isNegative = $Size -lt 0
+  $Size = [math]::Abs($Size)
+  if ($Size -ge 1099511627776) { # check that size in TB
+    $result = ($($Size)/1099511627776).ToString("0.###") + " TB"
+  } elseif ($Size -ge 1073741824) { # check that size in GB
+    $result = ($($Size)/1073741824).ToString("0.###") + " GB"
+  } elseif ($Size -ge 1048576) { # check that size in MB
+    $result = ($($Size)/1048576).ToString("0.###") + " MB"
+  } else { # check that size in KB
+    $result = ($($Size)/1024).ToString("0.###") + " KB"
   }
+  if ($isNegative) {
+    $result = "-" + $result
+  }
+  return $result
 }
 Function Set-PSWindowTitle {
 <#
