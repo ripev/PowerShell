@@ -569,12 +569,18 @@ Function Connect-Remote {
 	.LINK
 		https://github.com/ripev/PowerShell/
 #>
+	[CmdletBinding(DefaultParameterSetName='creds')]
 	param (
 		[Parameter(Mandatory=$true,Position=0)] [ValidateNotNullOrEmpty()] [string] $srv,
-		[Parameter(Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential
+		[Parameter(ParameterSetName='creds',Mandatory=$false,Position=1)] [Alias("Cred")] [PSCredential] $Credential,
+		[Parameter(ParameterSetName='admin',Mandatory=$false,Position=1)] [switch] $admin
 	)
-	if ($Credential -eq $null) {$Credential = Get-StoredCredential}
-	Enter-PSSession -ComputerName $srv -UseSSL -Credential $Credential
+	if ($admin) {
+		$Credential = Get-StoredCredential $($env:USERNAME).replace('.', '_')
+	} elseif ($null -eq $Credential) {
+		$Credential = Get-StoredCredential
+	}
+	Enter-PSSession -ComputerName $srv -Credential $Credential
 }
 
 Function Get-File {
