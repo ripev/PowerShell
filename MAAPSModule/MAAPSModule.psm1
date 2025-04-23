@@ -894,7 +894,7 @@ function ConvertFrom-Base64 {
 	return $convertedString
 }
 
-function Capture-Screen
+function Save-ScreenShot
 {
 	<#
 		.Synopsis
@@ -933,7 +933,7 @@ function Capture-Screen
 }
 
 Set-Alias -name cr Connect-Remote
-Set-Alias -name cs Capture-Screen
+Set-Alias -name svs Save-ScreenShot
 Set-Alias -name icc Invoke-ComDepCommand
 Set-Alias -name maac Get-MAACommands
 Set-Alias -name maav Get-MAAPSModuleVerions
